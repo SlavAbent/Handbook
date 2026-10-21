@@ -1,0 +1,85 @@
+---
+title: useTransition
+description: useTransition — неблокирующие обновления React с тремя примерами.
+---
+
+# `useTransition`
+
+`useTransition` помечает обновления состояния как неблокирующие и сообщает, пока Transition выполняется.
+
+```tsx
+const [isPending, startTransition] = useTransition()
+```
+
+Функция в `startTransition` вызывается сразу; синхронные set-функции внутри получают низкий приоритет. Transition нельзя использовать для управления текстовым input.
+
+## 1. Переключение тяжёлой вкладки
+
+```tsx
+import { useState, useTransition } from 'react'
+
+export function Tabs() {
+  const [tab, setTab] = useState('about')
+  const [isPending, startTransition] = useTransition()
+
+  function openPosts() {
+    startTransition(() => setTab('posts'))
+  }
+
+  return (
+    <>
+      <button onClick={openPosts}>Посты</button>
+      <main aria-busy={isPending}>{tab}</main>
+    </>
+  )
+}
+```
+
+## 2. Навигация без блокировки
+
+```tsx
+import { useTransition } from 'react'
+
+export function Link({ href, children }: { href: string; children: React.ReactNode }) {
+  const [pending, startTransition] = useTransition()
+
+  function navigate(event: React.MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault()
+    startTransition(() => router.navigate(href))
+  }
+
+  return (
+    <a aria-busy={pending} href={href} onClick={navigate}>
+      {children}
+    </a>
+  )
+}
+```
+
+## 3. Action с ожиданием
+
+```tsx
+import { useState, useTransition } from 'react'
+
+export function Quantity() {
+  const [quantity, setQuantity] = useState(1)
+  const [pending, startTransition] = useTransition()
+
+  function increment() {
+    startTransition(async () => {
+      const nextQuantity = await api.increment(quantity)
+      setQuantity(nextQuantity)
+    })
+  }
+
+  return (
+    <button disabled={pending} onClick={increment}>
+      {quantity}
+    </button>
+  )
+}
+```
+
+После `await` обновления состояния иногда требуется обернуть в дополнительный `startTransition`. Ошибки Actions должны обрабатываться Error Boundary или вашей логикой.
+
+[Официальная документация `useTransition`](https://react.dev/reference/react/useTransition)

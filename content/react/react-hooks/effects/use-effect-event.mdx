@@ -1,0 +1,66 @@
+---
+title: useEffectEvent
+description: useEffectEvent — нереактивные события внутри React-эффектов.
+---
+
+# `useEffectEvent`
+
+`useEffectEvent` создаёт функцию для нереактивной логики эффекта. Она всегда читает последние props и state, но сама не должна добавляться в зависимости эффекта.
+
+```tsx
+const onEvent = useEffectEvent(callback)
+```
+
+Effect Event разрешено вызывать только из эффекта или другого Effect Event. Это не способ скрыть настоящую зависимость и не обычный обработчик клика.
+
+## 1. Уведомление без переподключения
+
+```tsx
+import { useEffect, useEffectEvent } from 'react'
+
+export function Chat({ roomId, theme }: { roomId: string; theme: string }) {
+  const onConnected = useEffectEvent(() => console.log(`Подключено, тема: ${theme}`))
+  useEffect(() => {
+    const connection = connect(roomId, onConnected)
+    return () => connection.disconnect()
+  }, [roomId])
+  return null
+}
+```
+
+## 2. Интервал с последним callback
+
+```tsx
+import { useEffect, useEffectEvent } from 'react'
+
+function useInterval(callback: () => void, delay: number) {
+  const onTick = useEffectEvent(callback)
+
+  useEffect(() => {
+    const id = setInterval(onTick, delay)
+    return () => clearInterval(id)
+  }, [delay])
+}
+```
+
+## 3. Аналитика с актуальной корзиной
+
+```tsx
+import { useEffect, useEffectEvent } from 'react'
+
+export function Page({ url, cartSize }: { url: string; cartSize: number }) {
+  const logVisit = useEffectEvent((visitedUrl: string) => {
+    analytics.visit(visitedUrl, cartSize)
+  })
+
+  useEffect(() => {
+    logVisit(url)
+  }, [url])
+
+  return <main>{url}</main>
+}
+```
+
+Не передавайте Effect Event дочерним компонентам и не вызывайте его во время рендера. Его идентичность намеренно не считается стабильной.
+
+[Официальная документация `useEffectEvent`](https://react.dev/reference/react/useEffectEvent)

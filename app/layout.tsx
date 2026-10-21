@@ -9,11 +9,11 @@ import { getPageMap } from 'nextra/page-map'
 import './styles.css'
 
 export const metadata: Metadata = {
-  title: { default: 'TypeScript: ручная книга', template: '%s — TypeScript: ручная книга' },
-  description: 'Практический русскоязычный справочник по Utility Types в TypeScript.',
-  applicationName: 'TypeScript Handbook RU',
+  title: { default: 'Карманная книга разработчика', template: '%s — Карманная книга разработчика' },
+  description: 'Практический русскоязычный справочник по React, React DOM и TypeScript.',
+  applicationName: 'Карманная книга разработчика',
   manifest: '/manifest.webmanifest',
-  appleWebApp: { capable: true, title: 'TS Handbook', statusBarStyle: 'default' },
+  appleWebApp: { capable: true, title: 'Карманная книга', statusBarStyle: 'default' },
   icons: { apple: '/icons/apple-touch-icon.png', icon: '/icons/icon.svg' }
 }
 
@@ -25,7 +25,7 @@ export const viewport: Viewport = {
 }
 
 const navbar = (
-  <Navbar logo={<span className="brand"><span className="brandMark">TS</span><span>Ручная книга</span></span>}>
+  <Navbar logo={<span className="brand"><span className="brandMark">DEV</span><span>Карманная книга</span></span>}>
     <ThemeToggle />
   </Navbar>
 )
@@ -39,7 +39,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           pageMap={await getPageMap()}
           search={<UtilitySearch />}
           sidebar={{ autoCollapse: true, defaultMenuCollapseLevel: 1, toggleButton: true }}
-          toc={{ title: 'Utility Types', backToTop: false, extraContent: <UtilityNav /> }}
+          toc={{ title: 'На этой странице', backToTop: false, extraContent: <UtilityNav /> }}
           darkMode={false}
           editLink={null}
           feedback={{ content: null }}

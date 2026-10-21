@@ -1,0 +1,83 @@
+---
+title: useContext
+description: useContext — чтение React-контекста с тремя примерами.
+---
+
+# `useContext`
+
+`useContext` читает значение ближайшего соответствующего провайдера выше компонента и подписывает компонент на его изменения.
+
+```tsx
+const value = useContext(SomeContext)
+```
+
+Значение по умолчанию применяется только при полном отсутствии провайдера. Провайдер в том же компоненте не влияет на вызов `useContext` выше него. Новая ссылка в `value` обновляет всех потребителей.
+
+## 1. Тема интерфейса
+
+```tsx
+import { createContext, useContext } from 'react'
+
+const ThemeContext = createContext<'light' | 'dark'>('light')
+function Button() {
+  const theme = useContext(ThemeContext)
+
+  return <button className={theme}>Сохранить</button>
+}
+
+export function App() {
+  return (
+    <ThemeContext value="dark">
+      <Button />
+    </ThemeContext>
+  )
+}
+```
+
+## 2. Обязательный контекст
+
+```tsx
+import { createContext, useContext } from 'react'
+
+type Session = { userName: string }
+const SessionContext = createContext<Session | null>(null)
+function useSession() {
+  const session = useContext(SessionContext)
+  if (!session) throw new Error('SessionContext не предоставлен')
+  return session
+}
+export function Greeting() {
+  const session = useSession()
+
+  return <p>Привет, {session.userName}</p>
+}
+```
+
+## 3. Вложенное переопределение
+
+```tsx
+import { createContext, useContext } from 'react'
+
+const LevelContext = createContext(0)
+function Heading({ children }: { children: React.ReactNode }) {
+  const level = useContext(LevelContext)
+
+  return (
+    <p aria-level={level} role="heading">
+      {children}
+    </p>
+  )
+}
+
+export function Section() {
+  return (
+    <LevelContext value={2}>
+      <Heading>Профиль</Heading>
+    </LevelContext>
+  )
+}
+```
+
+Не используйте контекст для каждого локального значения: часто композиция или props понятнее. Для объектов стабилизируйте `value` только при доказанной проблеме лишних обновлений.
+
+[Официальная документация `useContext`](https://react.dev/reference/react/useContext)

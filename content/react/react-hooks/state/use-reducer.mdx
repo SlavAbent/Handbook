@@ -1,0 +1,92 @@
+---
+title: useReducer
+description: useReducer — управление состоянием через reducer с тремя примерами.
+---
+
+# `useReducer`
+
+`useReducer` хранит состояние, но переносит правила его изменения в чистую функцию reducer. Он полезен, когда обновления многочисленны, связаны друг с другом или должны быть явно описаны действиями.
+
+```tsx
+const [state, dispatch] = useReducer(reducer, initialArg, init?)
+```
+
+Reducer получает текущее состояние и action, затем возвращает следующее состояние. `dispatch` имеет стабильную идентичность. Не мутируйте состояние внутри reducer.
+
+## 1. Типизированный счётчик
+
+```tsx
+import { useReducer } from 'react'
+
+type Action = { type: 'increment' } | { type: 'reset' }
+function reducer(count: number, action: Action) {
+  return action.type === 'increment' ? count + 1 : 0
+}
+
+export function Counter() {
+  const [count, dispatch] = useReducer(reducer, 0)
+
+  return (
+    <>
+      <button onClick={() => dispatch({ type: 'increment' })}>
+        {count}
+      </button>
+      <button onClick={() => dispatch({ type: 'reset' })}>
+        Сбросить
+      </button>
+    </>
+  )
+}
+```
+
+## 2. Форма с несколькими действиями
+
+```tsx
+import { useReducer } from 'react'
+
+type State = { name: string; sent: boolean }
+type Action = { type: 'name'; value: string } | { type: 'submit' }
+const reducer = (state: State, action: Action): State => action.type === 'name'
+  ? { ...state, name: action.value }
+  : { ...state, sent: true }
+export function Form() {
+  const [state, dispatch] = useReducer(reducer, { name: '', sent: false })
+
+  if (state.sent) return <p>Отправлено</p>
+
+  return (
+    <input
+      value={state.name}
+      onChange={event => dispatch({ type: 'name', value: event.target.value })}
+    />
+  )
+}
+```
+
+## 3. Ленивая подготовка состояния
+
+```tsx
+import { useReducer } from 'react'
+
+function init(items: string[]) {
+  return { items, selected: items[0] ?? null }
+}
+
+function reducer(state: ReturnType<typeof init>, selected: string) {
+  return { ...state, selected }
+}
+
+export function List({ items }: { items: string[] }) {
+  const [state, select] = useReducer(reducer, items, init)
+
+  return (
+    <button onClick={() => state.items[1] && select(state.items[1])}>
+      {state.selected}
+    </button>
+  )
+}
+```
+
+В Strict Mode reducer и initializer могут вызываться дважды в разработке. Побочные эффекты должны находиться в обработчиках событий или эффектах, а не в reducer.
+
+[Официальная документация `useReducer`](https://react.dev/reference/react/useReducer)

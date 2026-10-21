@@ -1,0 +1,71 @@
+---
+title: useMemo
+description: useMemo — кэширование вычислений между рендерами с тремя примерами.
+---
+
+# `useMemo`
+
+`useMemo` кэширует результат чистого вычисления, пока его зависимости не изменились.
+
+```tsx
+const value = useMemo(calculateValue, dependencies)
+```
+
+Это оптимизация производительности, а не гарантия семантики. Код должен оставаться корректным без кэша. React сравнивает зависимости через `Object.is`.
+
+## 1. Фильтрация большого списка
+
+```tsx
+import { useMemo } from 'react'
+
+export function Search({ items, query }: { items: string[]; query: string }) {
+  const visible = useMemo(
+    () => items.filter(item => item.includes(query)),
+    [items, query]
+  )
+
+  return (
+    <ul>
+      {visible.map(item => <li key={item}>{item}</li>)}
+    </ul>
+  )
+}
+```
+
+## 2. Стабильный объект контекста
+
+```tsx
+import { useMemo } from 'react'
+
+export function SessionProvider({ user, children }: { user: User; children: React.ReactNode }) {
+  const value = useMemo(
+    () => ({ user, canEdit: user.role === 'editor' }),
+    [user]
+  )
+
+  return (
+    <SessionContext value={value}>
+      {children}
+    </SessionContext>
+  )
+}
+```
+
+## 3. Индекс для поиска
+
+```tsx
+import { useMemo } from 'react'
+
+export function Directory({ users }: { users: User[] }) {
+  const byId = useMemo(
+    () => new Map(users.map(user => [user.id, user])),
+    [users]
+  )
+
+  return <output>{byId.size} пользователей</output>
+}
+```
+
+Не оборачивайте каждое простое выражение в `useMemo`. Сначала найдите дорогое вычисление или требование стабильной ссылки, затем измерьте эффект оптимизации.
+
+[Официальная документация `useMemo`](https://react.dev/reference/react/useMemo)

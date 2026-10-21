@@ -1,0 +1,59 @@
+---
+title: useDebugValue
+description: useDebugValue — подпись пользовательского хука в React DevTools.
+---
+
+# `useDebugValue`
+
+`useDebugValue` добавляет понятную подпись пользовательскому хуку в React DevTools. Он предназначен прежде всего для переиспользуемых библиотечных хуков.
+
+```tsx
+useDebugValue(value, format?)
+```
+
+Не размещайте его в каждом небольшом хуке. Необязательный formatter вызывается только при инспектировании компонента и помогает отложить дорогое форматирование.
+
+## 1. Статус сети
+
+```tsx
+import { useDebugValue, useSyncExternalStore } from 'react'
+
+function useOnlineStatus() {
+  const online = useSyncExternalStore(
+    subscribe,
+    () => navigator.onLine,
+    () => true
+  )
+
+  useDebugValue(online ? 'В сети' : 'Нет сети')
+  return online
+}
+```
+
+## 2. Отложенное форматирование
+
+```tsx
+import { useDebugValue } from 'react'
+
+function useDate(timestamp: number) {
+  const date = new Date(timestamp)
+  useDebugValue(date, value => value.toLocaleString('ru'))
+  return date
+}
+```
+
+## 3. Составная подпись
+
+```tsx
+import { useDebugValue, useState } from 'react'
+
+function useRequestState() {
+  const [state] = useState<'idle' | 'loading' | 'error'>('idle')
+  useDebugValue(`Запрос: ${state}`)
+  return state
+}
+```
+
+Хук ничего не отображает пользователю и не заменяет логирование или обработку ошибок. Его результат виден только в поддерживающих инструментах разработчика.
+
+[Официальная документация `useDebugValue`](https://react.dev/reference/react/useDebugValue)

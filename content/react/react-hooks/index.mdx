@@ -1,0 +1,54 @@
+---
+title: React Hooks
+description: Каталог встроенных хуков React 19.3.
+asIndexPage: true
+---
+
+# React Hooks
+
+Хуки позволяют компонентам использовать состояние, контекст, ссылки, эффекты и конкурентный рендеринг. Вызывайте хуки только на верхнем уровне компонента или собственного хука; исключение по форме вызова — API `use`, который не входит в этот каталог хуков.
+
+## Состояние
+
+<div className="utility-grid">
+  <a href="/react/react-hooks/state/use-state"><code>useState</code><span>Локальное состояние компонента</span></a>
+  <a href="/react/react-hooks/state/use-reducer"><code>useReducer</code><span>Состояние со сложной логикой обновления</span></a>
+</div>
+
+## Контекст и ссылки
+
+<div className="utility-grid">
+  <a href="/react/react-hooks/context/use-context"><code>useContext</code><span>Чтение ближайшего провайдера контекста</span></a>
+  <a href="/react/react-hooks/refs/use-ref"><code>useRef</code><span>DOM-узел или изменяемое значение</span></a>
+  <a href="/react/react-hooks/refs/use-imperative-handle"><code>useImperativeHandle</code><span>Настройка публичного ref-интерфейса</span></a>
+</div>
+
+## Эффекты
+
+<div className="utility-grid">
+  <a href="/react/react-hooks/effects/use-effect"><code>useEffect</code><span>Синхронизация с внешней системой</span></a>
+  <a href="/react/react-hooks/effects/use-effect-event"><code>useEffectEvent</code><span>Нереактивная логика внутри эффекта</span></a>
+  <a href="/react/react-hooks/effects/use-layout-effect"><code>useLayoutEffect</code><span>Измерения до перерисовки браузера</span></a>
+  <a href="/react/react-hooks/effects/use-insertion-effect"><code>useInsertionEffect</code><span>Вставка CSS библиотеками</span></a>
+</div>
+
+## Производительность
+
+<div className="utility-grid">
+  <a href="/react/react-hooks/performance/use-memo"><code>useMemo</code><span>Кэширование результата вычисления</span></a>
+  <a href="/react/react-hooks/performance/use-callback"><code>useCallback</code><span>Кэширование функции</span></a>
+  <a href="/react/react-hooks/performance/use-transition"><code>useTransition</code><span>Неблокирующее обновление</span></a>
+  <a href="/react/react-hooks/performance/use-deferred-value"><code>useDeferredValue</code><span>Отложенное значение</span></a>
+</div>
+
+## Actions и служебные хуки
+
+<div className="utility-grid">
+  <a href="/react/react-hooks/actions/use-action-state"><code>useActionState</code><span>Состояние результата Action</span></a>
+  <a href="/react/react-hooks/actions/use-optimistic"><code>useOptimistic</code><span>Оптимистичное состояние</span></a>
+  <a href="/react/react-hooks/utilities/use-debug-value"><code>useDebugValue</code><span>Подпись хука в DevTools</span></a>
+  <a href="/react/react-hooks/utilities/use-id"><code>useId</code><span>Стабильный идентификатор</span></a>
+  <a href="/react/react-hooks/utilities/use-sync-external-store"><code>useSyncExternalStore</code><span>Подписка на внешнее хранилище</span></a>
+</div>
+
+Перечень сверен с <a className="official-reference" href="https://react.dev/reference/react/hooks">официальной документацией React 19.3</a>. `useOptimistic` также включён как официальный встроенный хук React.

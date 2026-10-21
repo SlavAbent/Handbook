@@ -1,0 +1,62 @@
+---
+title: useCallback
+description: useCallback — кэширование функции между рендерами с тремя примерами.
+---
+
+# `useCallback`
+
+`useCallback` возвращает ту же функцию, пока зависимости не изменились. Сам вызов функции не кэшируется.
+
+```tsx
+const cachedFn = useCallback(fn, dependencies)
+```
+
+Хук полезен при передаче callback в мемоизированный компонент или когда функция является зависимостью другого хука.
+
+## 1. Callback для `memo`
+
+```tsx
+import { memo, useCallback } from 'react'
+
+const SaveButton = memo(function SaveButton({ onSave }: { onSave(): void }) {
+  return <button onClick={onSave}>Сохранить</button>
+})
+
+export function Editor({ documentId }: { documentId: string }) {
+  const save = useCallback(() => api.save(documentId), [documentId])
+
+  return <SaveButton onSave={save} />
+}
+```
+
+## 2. Функция из пользовательского хука
+
+```tsx
+import { useCallback } from 'react'
+
+function useRouter() {
+  const navigate = useContext(RouterContext)
+  return useCallback((path: string) => navigate(path), [navigate])
+}
+```
+
+## 3. Зависимость эффекта
+
+```tsx
+import { useCallback, useEffect } from 'react'
+
+export function Room({ roomId }: { roomId: string }) {
+  const createOptions = useCallback(() => ({ roomId, serverUrl: '/chat' }), [roomId])
+
+  useEffect(() => {
+    const room = connect(createOptions())
+    return () => room.close()
+  }, [createOptions])
+
+  return <p>{roomId}</p>
+}
+```
+
+Часто проще перенести функцию внутрь эффекта. Не используйте `useCallback` без потребителя, которому важна стабильная ссылка.
+
+[Официальная документация `useCallback`](https://react.dev/reference/react/useCallback)

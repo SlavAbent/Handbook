@@ -1,0 +1,88 @@
+---
+title: useFormStatus
+description: useFormStatus — состояние отправки родительской React DOM формы.
+---
+
+# `useFormStatus`
+
+`useFormStatus` из `react-dom` возвращает сведения о последней отправке ближайшей родительской формы.
+
+```tsx
+const { pending, data, method, action } = useFormStatus()
+```
+
+Компонент с хуком должен быть потомком `<form>`. Хук не отслеживает форму, отрисованную тем же компонентом, и не видит дочерние формы.
+
+## 1. Кнопка ожидания
+
+```tsx
+import { useFormStatus } from 'react-dom'
+
+function SubmitButton() {
+  const { pending } = useFormStatus()
+
+  return (
+    <button disabled={pending}>
+      {pending ? 'Отправка…' : 'Отправить'}
+    </button>
+  )
+}
+
+export function Form() {
+  return (
+    <form action={save}>
+      <SubmitButton />
+    </form>
+  )
+}
+```
+
+## 2. Отправляемые данные
+
+```tsx
+import { useFormStatus } from 'react-dom'
+
+function Status() {
+  const { pending, data } = useFormStatus()
+
+  return pending ? <p>Сохраняем «{String(data?.get('title') ?? '')}»…</p> : null
+}
+
+export function Editor() {
+  return (
+    <form action={save}>
+      <input name="title" />
+      <Status />
+    </form>
+  )
+}
+```
+
+## 3. Метод и Action
+
+```tsx
+import { useFormStatus } from 'react-dom'
+
+function FormDebug() {
+  const { method, action, pending } = useFormStatus()
+
+  return (
+    <output>
+      {pending ? `${method.toUpperCase()}: ${action?.name ?? 'URL'}` : 'Готово'}
+    </output>
+  )
+}
+
+export function DeleteForm() {
+  return (
+    <form action={remove}>
+      <FormDebug />
+      <button>Удалить</button>
+    </form>
+  )
+}
+```
+
+Если `pending` всегда `false`, сначала проверьте положение компонента: он должен рендериться внутри формы, а не рядом с ней или в компоненте, который эту форму создаёт.
+
+[Официальная документация `useFormStatus`](https://react.dev/reference/react-dom/hooks/useFormStatus)

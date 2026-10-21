@@ -1,11 +1,11 @@
 ---
-title: "TypeScript: ручная книга"
-description: Практический русскоязычный справочник по Utility Types.
+title: "Карманная книга разработчика"
+description: Практический русскоязычный справочник по React и TypeScript.
 ---
 
-# TypeScript: ручная книга
+# Карманная книга разработчика
 
-Практический справочник по встроенным **Utility Types** TypeScript. Здесь собраны все утилиты из актуального официального Handbook: короткое объяснение, синтаксис и несколько самостоятельных примеров для каждой.
+Практический справочник, который не привязан к одной технологии. Сейчас в книге собраны встроенные хуки **React 19.3**, хуки **React DOM** и **Utility Types** TypeScript.
 
 ## Как читать книгу
 
@@ -15,20 +15,16 @@ description: Практический русскоязычный справоч�
 
 ## Карта материалов
 
-| Группа | Что внутри |
+| Технология | Что внутри |
 | --- | --- |
-| Объектные преобразования | `Partial`, `Required`, `Readonly`, `Record`, `Pick`, `Omit` |
-| Объединения | `Exclude`, `Extract`, `NonNullable` |
-| Функции | `Parameters`, `ReturnType` |
-| Конструкторы | `ConstructorParameters`, `InstanceType` |
-| Контекст `this` | `ThisParameterType`, `OmitThisParameter`, `ThisType` |
-| Строки | `Uppercase`, `Lowercase`, `Capitalize`, `Uncapitalize` |
-| Асинхронность и вывод | `Awaited`, `NoInfer` |
+| React | Все встроенные хуки, разделённые по назначению |
+| React DOM | Хуки для браузерного DOM и форм |
+| TypeScript | Встроенные Utility Types |
 
 ## Принципы примеров
 
-- Все фрагменты рассчитаны на строгий режим TypeScript.
+- Все фрагменты рассчитаны на TypeScript и TSX в строгом режиме.
 - Строка `// @ts-expect-error` отмечает намеренную ошибку компиляции.
 - Утилиты преобразуют типы и не изменяют значения во время выполнения.
 
-Начните с [обзора Utility Types](/utility-types/).
+Начните с [обзора React](/react/) или перейдите к [Utility Types](/utility-types/).

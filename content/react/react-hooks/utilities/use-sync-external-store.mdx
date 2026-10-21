@@ -1,0 +1,85 @@
+---
+title: useSyncExternalStore
+description: useSyncExternalStore — безопасная подписка React на внешнее хранилище.
+---
+
+# `useSyncExternalStore`
+
+`useSyncExternalStore` подписывает компонент на данные, которыми управляет система вне React.
+
+```tsx
+const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot?)
+```
+
+`subscribe` регистрирует callback и возвращает отписку. `getSnapshot` должен возвращать неизменяемый снимок и ту же ссылку, пока данные не поменялись. Для SSR передайте согласованный серверный снимок.
+
+## 1. Статус сети
+
+```tsx
+import { useSyncExternalStore } from 'react'
+
+function subscribe(callback: () => void) {
+  window.addEventListener('online', callback)
+  window.addEventListener('offline', callback)
+
+  return () => {
+    window.removeEventListener('online', callback)
+    window.removeEventListener('offline', callback)
+  }
+}
+
+export function Status() {
+  const online = useSyncExternalStore(
+    subscribe,
+    () => navigator.onLine,
+    () => true
+  )
+
+  return <p>{online ? 'В сети' : 'Нет сети'}</p>
+}
+```
+
+## 2. Внешнее хранилище
+
+```tsx
+import { useSyncExternalStore } from 'react'
+
+export function Todos() {
+  const todos = useSyncExternalStore(
+    todoStore.subscribe,
+    todoStore.getSnapshot,
+    todoStore.getServerSnapshot
+  )
+
+  return (
+    <ul>
+      {todos.map(todo => <li key={todo.id}>{todo.title}</li>)}
+    </ul>
+  )
+}
+```
+
+## 3. Синхронизация вкладок
+
+```tsx
+import { useSyncExternalStore } from 'react'
+
+function subscribe(callback: () => void) {
+  window.addEventListener('storage', callback)
+  return () => window.removeEventListener('storage', callback)
+}
+
+export function Locale() {
+  const locale = useSyncExternalStore(
+    subscribe,
+    () => localStorage.getItem('locale') ?? 'ru',
+    () => 'ru'
+  )
+
+  return <output>{locale}</output>
+}
+```
+
+Для состояния, принадлежащего React, используйте `useState` или `useReducer`. Если `getSnapshot` каждый раз создаёт новый объект, возникнет бесконечный цикл обновлений.
+
+[Официальная документация `useSyncExternalStore`](https://react.dev/reference/react/useSyncExternalStore)
