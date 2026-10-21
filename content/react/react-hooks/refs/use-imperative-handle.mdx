@@ -1,0 +1,80 @@
+---
+title: useImperativeHandle
+description: useImperativeHandle — настройка ref-интерфейса компонента с тремя примерами.
+---
+
+# `useImperativeHandle`
+
+`useImperativeHandle` ограничивает или настраивает значение, которое родитель получает через `ref`. В React 19 `ref` доступен как prop; обычно лучше выразить поведение через props и состояние.
+
+```tsx
+useImperativeHandle(ref, createHandle, dependencies?)
+```
+
+`createHandle` возвращает публичный интерфейс. Все реактивные значения, используемые внутри, должны входить в зависимости.
+
+## 1. Только фокус и очистка
+
+```tsx
+import { useImperativeHandle, useRef } from 'react'
+
+type InputHandle = { focus(): void; clear(): void }
+function SmartInput({ ref }: { ref: React.Ref<InputHandle> }) {
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useImperativeHandle(ref, () => ({
+    focus: () => inputRef.current?.focus(),
+    clear: () => {
+      if (inputRef.current) inputRef.current.value = ''
+    }
+  }), [])
+
+  return <input ref={inputRef} />
+}
+```
+
+## 2. Прокрутка списка
+
+```tsx
+import { useImperativeHandle, useRef } from 'react'
+
+type ListHandle = { scrollToTop(): void }
+export function List({ ref, items }: { ref: React.Ref<ListHandle>; items: string[] }) {
+  const rootRef = useRef<HTMLUListElement>(null)
+
+  useImperativeHandle(ref, () => ({
+    scrollToTop: () => rootRef.current?.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
+  }), [])
+
+  return (
+    <ul ref={rootRef}>
+      {items.map(item => <li key={item}>{item}</li>)}
+    </ul>
+  )
+}
+```
+
+## 3. Методы диалога
+
+```tsx
+import { useImperativeHandle, useRef } from 'react'
+
+type DialogHandle = { open(): void; close(): void }
+export function Dialog({ ref }: { ref: React.Ref<DialogHandle> }) {
+  const dialogRef = useRef<HTMLDialogElement>(null)
+
+  useImperativeHandle(ref, () => ({
+    open: () => dialogRef.current?.showModal(),
+    close: () => dialogRef.current?.close()
+  }), [])
+
+  return <dialog ref={dialogRef}>Настройки</dialog>
+}
+```
+
+Не раскрывайте весь DOM-узел, если достаточно нескольких команд. Императивный API усложняет поток данных и должен оставаться небольшим и устойчивым.
+
+[Официальная документация `useImperativeHandle`](https://react.dev/reference/react/useImperativeHandle)

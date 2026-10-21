@@ -1,0 +1,87 @@
+---
+title: useActionState
+description: useActionState — состояние результата React Action с тремя примерами.
+---
+
+# `useActionState`
+
+`useActionState` связывает состояние с Action и сообщает о её выполнении.
+
+```tsx
+const [state, dispatchAction, isPending] = useActionState(action, initialState, permalink?)
+```
+
+Action получает предыдущее состояние первым аргументом, затем переданный payload. Вызов dispatcher должен происходить внутри Action-контекста, например через `action` формы или `startTransition`.
+
+## 1. Проверка формы
+
+```tsx
+import { useActionState } from 'react'
+
+async function save(_: string, formData: FormData) {
+  return formData.get('name') ? 'Сохранено' : 'Введите имя'
+}
+
+export function ProfileForm() {
+  const [message, action, pending] = useActionState(save, '')
+
+  return (
+    <form action={action}>
+      <input name="name" />
+      <button disabled={pending}>Сохранить</button>
+      <p>{message}</p>
+    </form>
+  )
+}
+```
+
+## 2. Счётчик Actions
+
+```tsx
+import { startTransition, useActionState } from 'react'
+
+async function increment(count: number, step: number) {
+  await api.delay()
+  return count + step
+}
+
+export function Counter() {
+  const [count, dispatch, pending] = useActionState(increment, 0)
+
+  function addTwo() {
+    startTransition(() => dispatch(2))
+  }
+
+  return (
+    <button disabled={pending} onClick={addTwo}>
+      {count}
+    </button>
+  )
+}
+```
+
+## 3. Типизированный результат
+
+```tsx
+import { useActionState } from 'react'
+
+type Result = { ok: boolean; error?: string }
+async function register(_: Result, data: FormData): Promise<Result> {
+  return api.register(data)
+}
+
+export function Register() {
+  const [result, action, pending] = useActionState(register, { ok: false })
+
+  return (
+    <form action={action}>
+      <button disabled={pending}>Создать аккаунт</button>
+      {result.error && <p role="alert">{result.error}</p>}
+    </form>
+  )
+}
+```
+
+Не путайте первый аргумент Action с обычной form action: из-за добавленного предыдущего состояния `FormData` становится вторым аргументом.
+
+[Официальная документация `useActionState`](https://react.dev/reference/react/useActionState)

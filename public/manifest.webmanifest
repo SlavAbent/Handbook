@@ -1,7 +1,7 @@
 {
-  "name": "TypeScript: ручная книга",
-  "short_name": "TS Handbook",
-  "description": "Русскоязычный справочник по Utility Types в TypeScript",
+  "name": "Карманная книга разработчика",
+  "short_name": "Карманная книга",
+  "description": "Русскоязычный справочник по React, React DOM и TypeScript",
   "lang": "ru",
   "start_url": "/",
   "scope": "/",

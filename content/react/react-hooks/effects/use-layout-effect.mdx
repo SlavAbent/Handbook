@@ -1,0 +1,82 @@
+---
+title: useLayoutEffect
+description: useLayoutEffect — синхронные измерения макета до отрисовки браузера.
+---
+
+# `useLayoutEffect`
+
+`useLayoutEffect` похож на `useEffect`, но React выполняет его до перерисовки экрана браузером. Он нужен для измерения DOM и немедленной коррекции макета без мерцания.
+
+```tsx
+useLayoutEffect(setup, dependencies?)
+```
+
+Хук блокирует отрисовку и может ухудшить производительность. На сервере layout отсутствует, поэтому для большинства синхронизаций выбирайте `useEffect`.
+
+## 1. Измерение высоты подсказки
+
+```tsx
+import { useLayoutEffect, useRef, useState } from 'react'
+
+export function Tooltip({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [height, setHeight] = useState(0)
+
+  useLayoutEffect(() => {
+    const nextHeight = ref.current?.getBoundingClientRect().height ?? 0
+    setHeight(nextHeight)
+  }, [])
+
+  return (
+    <div ref={ref} style={{ transform: `translateY(-${height}px)` }}>
+      {children}
+    </div>
+  )
+}
+```
+
+## 2. Восстановление прокрутки
+
+```tsx
+import { useLayoutEffect, useRef } from 'react'
+
+export function Feed({ items }: { items: string[] }) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    if (ref.current) {
+      ref.current.scrollTop = ref.current.scrollHeight
+    }
+  }, [items.length])
+
+  return (
+    <div ref={ref}>
+      {items.map(item => <p key={item}>{item}</p>)}
+    </div>
+  )
+}
+```
+
+## 3. Синхронный размер canvas
+
+```tsx
+import { useLayoutEffect, useRef } from 'react'
+
+export function Chart() {
+  const ref = useRef<HTMLCanvasElement>(null)
+  useLayoutEffect(() => {
+    const canvas = ref.current
+
+    if (canvas) {
+      canvas.width = canvas.clientWidth
+      canvas.height = canvas.clientHeight
+    }
+  }, [])
+
+  return <canvas ref={ref} />
+}
+```
+
+Всегда возвращайте cleanup для подписок. Если пользователь не заметит задержку до следующего кадра, замените этот хук на `useEffect`.
+
+[Официальная документация `useLayoutEffect`](https://react.dev/reference/react/useLayoutEffect)

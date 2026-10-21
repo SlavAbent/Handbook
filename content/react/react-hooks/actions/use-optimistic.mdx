@@ -1,0 +1,107 @@
+---
+title: useOptimistic
+description: useOptimistic — мгновенное отображение ожидаемого результата Action.
+---
+
+# `useOptimistic`
+
+`useOptimistic` временно показывает ожидаемый результат, пока Action выполняется. После завершения React снова использует каноническое значение.
+
+```tsx
+const [optimisticState, addOptimistic] = useOptimistic(state, updateFn?)
+```
+
+`updateFn` должна быть чистой: она получает текущее и оптимистичное значения. Оптимистическое обновление вызывают внутри Action.
+
+## 1. Мгновенное сообщение
+
+```tsx
+import { useOptimistic } from 'react'
+
+export function Thread({ messages, send }: Props) {
+  const [optimistic, add] = useOptimistic(
+    messages,
+    (items, text: string) => [
+      ...items,
+      { id: `temp-${text}`, text, pending: true }
+    ]
+  )
+
+  async function action(data: FormData) {
+    const text = String(data.get('text'))
+    add(text)
+    await send(text)
+  }
+
+  return (
+    <>
+      <ul>
+        {optimistic.map(item => (
+          <li key={item.id}>
+            {item.text}{item.pending && '…'}
+          </li>
+        ))}
+      </ul>
+      <form action={action}>
+        <input name="text" />
+      </form>
+    </>
+  )
+}
+```
+
+## 2. Оптимистичный лайк
+
+```tsx
+import { useOptimistic } from 'react'
+
+export function Like({ liked, update }: { liked: boolean; update(): Promise<void> }) {
+  const [optimisticLiked, setOptimisticLiked] = useOptimistic(liked)
+
+  async function action() {
+    setOptimisticLiked(!liked)
+    await update()
+  }
+
+  return (
+    <form action={action}>
+      <button aria-pressed={optimisticLiked}>
+        {optimisticLiked ? 'Нравится' : 'Нравится?'}
+      </button>
+    </form>
+  )
+}
+```
+
+## 3. Удаление строки
+
+```tsx
+import { useOptimistic } from 'react'
+
+export function Cart({ items, remove }: Props) {
+  const [visible, hide] = useOptimistic(
+    items,
+    (current, id: string) => current.filter(item => item.id !== id)
+  )
+
+  async function removeAction(id: string) {
+    hide(id)
+    await remove(id)
+  }
+
+  return (
+    <ul>
+      {visible.map(item => (
+        <li key={item.id}>
+          {item.name}
+          <button onClick={() => removeAction(item.id)}>Удалить</button>
+        </li>
+      ))}
+    </ul>
+  )
+}
+```
+
+Продумайте ошибку: после отклонения Action интерфейс вернётся к исходным данным, но пользователю всё равно нужно понятное сообщение и возможность повторить действие.
+
+[Официальная документация `useOptimistic`](https://react.dev/reference/react/useOptimistic)

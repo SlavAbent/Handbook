@@ -1,0 +1,71 @@
+---
+title: useEffect
+description: useEffect — синхронизация React-компонента с внешними системами.
+---
+
+# `useEffect`
+
+`useEffect` синхронизирует компонент с системой вне React: сетью, DOM API, таймером или сторонним виджетом. Если внешней системы нет, эффект, вероятно, не нужен.
+
+```tsx
+useEffect(setup, dependencies?)
+```
+
+`setup` может вернуть cleanup. После commit React запускает setup; перед повторным setup с изменившимися зависимостями и при размонтировании запускается cleanup.
+
+## 1. Подключение к комнате
+
+```tsx
+import { useEffect } from 'react'
+
+export function Chat({ roomId }: { roomId: string }) {
+  useEffect(() => {
+    const socket = new WebSocket(`wss://example.com/rooms/${roomId}`)
+    return () => socket.close()
+  }, [roomId])
+  return <p>Комната: {roomId}</p>
+}
+```
+
+## 2. Событие окна
+
+```tsx
+import { useEffect, useState } from 'react'
+
+export function Width() {
+  const [width, setWidth] = useState(() => window.innerWidth)
+  useEffect(() => {
+    const update = () => setWidth(window.innerWidth)
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+  return <output>{width}px</output>
+}
+```
+
+## 3. Запрос с защитой от устаревшего ответа
+
+```tsx
+import { useEffect, useState } from 'react'
+
+export function Bio({ userId }: { userId: string }) {
+  const [bio, setBio] = useState('Загрузка…')
+  useEffect(() => {
+    const controller = new AbortController()
+
+    fetch(`/api/users/${userId}`, { signal: controller.signal })
+      .then(response => response.text())
+      .then(setBio)
+      .catch(error => {
+        if (error.name !== 'AbortError') setBio('Ошибка')
+      })
+
+    return () => controller.abort()
+  }, [userId])
+  return <p>{bio}</p>
+}
+```
+
+Указывайте все реактивные зависимости. Strict Mode выполняет дополнительный цикл setup-cleanup в разработке; корректный cleanup делает его безопасным.
+
+[Официальная документация `useEffect`](https://react.dev/reference/react/useEffect)

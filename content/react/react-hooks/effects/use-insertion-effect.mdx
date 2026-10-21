@@ -1,0 +1,65 @@
+---
+title: useInsertionEffect
+description: useInsertionEffect — вставка динамического CSS библиотеками до layout-эффектов.
+---
+
+# `useInsertionEffect`
+
+`useInsertionEffect` предназначен главным образом для авторов CSS-in-JS библиотек. Он позволяет вставить стили до запуска layout-эффектов, чтобы измерения видели готовый CSS.
+
+```tsx
+useInsertionEffect(setup, dependencies?)
+```
+
+В этом хуке нельзя обновлять состояние. Refs ещё могут быть не присоединены, DOM — не обновлён полностью. Обычному приложению почти всегда подходит статический CSS.
+
+## 1. Вставка правила
+
+```tsx
+import { useInsertionEffect } from 'react'
+
+export function useCssRule(rule: string) {
+  useInsertionEffect(() => {
+    const style = document.createElement('style')
+    style.textContent = rule
+    document.head.append(style)
+    return () => style.remove()
+  }, [rule])
+}
+```
+
+## 2. Реестр стилей
+
+```tsx
+import { useInsertionEffect } from 'react'
+
+const styles = new Map<string, number>()
+export function useAtomicStyle(id: string, css: string) {
+  useInsertionEffect(() => {
+    styles.set(id, (styles.get(id) ?? 0) + 1)
+    insertRuleOnce(id, css)
+
+    return () => releaseRule(id, styles)
+  }, [id, css])
+}
+```
+
+## 3. Компонент библиотеки
+
+```tsx
+import { useInsertionEffect } from 'react'
+
+export function StyledText({ color, children }: { color: string; children: React.ReactNode }) {
+  const className = `text-${hash(color)}`
+
+  useInsertionEffect(() => {
+    return registerStyle(className, `.${className}{color:${color}}`)
+  }, [className, color])
+
+  return <span className={className}>{children}</span>
+}
+```
+
+Примеры показывают библиотечный уровень: в прикладном компоненте не создавайте отдельный `<style>` при каждом рендере. Setup может выполняться в другой момент относительно DOM, чем обычные эффекты.
+
+[Официальная документация `useInsertionEffect`](https://react.dev/reference/react/useInsertionEffect)

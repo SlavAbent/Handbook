@@ -1,0 +1,76 @@
+---
+title: useDeferredValue
+description: useDeferredValue — отложенное обновление части интерфейса с тремя примерами.
+---
+
+# `useDeferredValue`
+
+`useDeferredValue` возвращает отложенную версию значения. Срочная часть интерфейса обновляется сразу, а зависимая тяжёлая часть — в прерываемом фоновом рендере.
+
+```tsx
+const deferredValue = useDeferredValue(value, initialValue?)
+```
+
+Хук не задаёт фиксированную задержку и не уменьшает число сетевых запросов. Для выигрыша дочерняя часть обычно должна уметь пропускать рендер через `memo`.
+
+## 1. Результаты поиска
+
+```tsx
+import { memo, useDeferredValue, useState } from 'react'
+
+const Results = memo(function Results({ query }: { query: string }) {
+  return <ExpensiveResults query={query} />
+})
+
+export function Search() {
+  const [query, setQuery] = useState('')
+  const deferredQuery = useDeferredValue(query)
+
+  return (
+    <>
+      <input
+        value={query}
+        onChange={event => setQuery(event.target.value)}
+      />
+      <Results query={deferredQuery} />
+    </>
+  )
+}
+```
+
+## 2. Индикация устаревшего содержимого
+
+```tsx
+import { useDeferredValue } from 'react'
+
+export function Preview({ text }: { text: string }) {
+  const deferredText = useDeferredValue(text)
+  const stale = deferredText !== text
+
+  return (
+    <div style={{ opacity: stale ? 0.5 : 1 }}>
+      <Markdown text={deferredText} />
+    </div>
+  )
+}
+```
+
+## 3. Начальное значение при SSR
+
+```tsx
+import { useDeferredValue } from 'react'
+
+export function Chart({ points }: { points: number[] }) {
+  const deferredPoints = useDeferredValue(points, [])
+
+  if (!deferredPoints.length) {
+    return <p>Подготовка графика…</p>
+  }
+
+  return <HeavyChart points={deferredPoints} />
+}
+```
+
+Объекты, создаваемые во время рендера, постоянно считаются новыми; передавайте стабильное значение или вынесите его создание. Для debounce используйте отдельный механизм.
+
+[Официальная документация `useDeferredValue`](https://react.dev/reference/react/useDeferredValue)

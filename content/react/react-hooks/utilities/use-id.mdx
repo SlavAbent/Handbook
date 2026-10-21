@@ -1,0 +1,76 @@
+---
+title: useId
+description: useId — стабильные идентификаторы для доступности и SSR.
+---
+
+# `useId`
+
+`useId` создаёт уникальную строку, согласованную между серверным и клиентским рендером. Основной сценарий — связь доступных HTML-атрибутов.
+
+```tsx
+const id = useId()
+```
+
+Не используйте `useId` для ключей списка: ключ должен происходить из данных. Хук нельзя вызывать вне компонента или в цикле.
+
+## 1. Подпись поля
+
+```tsx
+import { useId } from 'react'
+
+export function EmailField() {
+  const id = useId()
+
+  return (
+    <>
+      <label htmlFor={id}>Почта</label>
+      <input id={id} type="email" />
+    </>
+  )
+}
+```
+
+## 2. Описание ошибки
+
+```tsx
+import { useId } from 'react'
+
+export function PasswordField({ error }: { error?: string }) {
+  const id = useId()
+  const errorId = `${id}-error`
+
+  return (
+    <>
+      <input
+        id={id}
+        aria-describedby={error ? errorId : undefined}
+      />
+      {error && <p id={errorId}>{error}</p>}
+    </>
+  )
+}
+```
+
+## 3. Несколько связанных элементов
+
+```tsx
+import { useId } from 'react'
+
+export function ShippingAddress() {
+  const prefix = useId()
+
+  return (
+    <fieldset>
+      <legend>Адрес</legend>
+      <label htmlFor={`${prefix}-city`}>Город</label>
+      <input id={`${prefix}-city`} />
+      <label htmlFor={`${prefix}-street`}>Улица</label>
+      <input id={`${prefix}-street`} />
+    </fieldset>
+  )
+}
+```
+
+При нескольких независимых React-корнях настройте `identifierPrefix`, чтобы избежать совпадений. Значение непрозрачно — не стройте на его формате бизнес-логику.
+
+[Официальная документация `useId`](https://react.dev/reference/react/useId)

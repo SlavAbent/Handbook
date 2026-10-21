@@ -1,0 +1,67 @@
+---
+title: useState
+description: useState — локальное состояние React-компонента с тремя примерами на TypeScript.
+---
+
+# `useState`
+
+`useState` добавляет компоненту локальное состояние. Хук возвращает текущее значение и функцию обновления; после обновления React планирует новый рендер.
+
+```tsx
+const [state, setState] = useState(initialState)
+```
+
+Начальное значение может быть значением или функцией-инициализатором. Если следующее состояние зависит от предыдущего, передавайте в setter функцию. React сравнивает новое значение через `Object.is`, объединять поля объекта вручную он не будет.
+
+## 1. Счётчик с функциональным обновлением
+
+```tsx
+import { useState } from 'react'
+
+export function Counter() {
+  const [count, setCount] = useState(0)
+
+  return (
+    <button onClick={() => setCount(value => value + 1)}>
+      Нажатий: {count}
+    </button>
+  )
+}
+```
+
+## 2. Обновление объекта без мутации
+
+```tsx
+import { useState } from 'react'
+
+export function Profile() {
+  const [user, setUser] = useState({ name: 'Анна', city: 'Пермь' })
+
+  function changeCity(event: React.ChangeEvent<HTMLInputElement>) {
+    setUser(current => ({ ...current, city: event.target.value }))
+  }
+
+  return <input value={user.city} onChange={changeCity} />
+}
+```
+
+## 3. Ленивая инициализация
+
+```tsx
+import { useState } from 'react'
+
+export function Draft() {
+  const [text, setText] = useState(() => localStorage.getItem('draft') ?? '')
+
+  return (
+    <textarea
+      value={text}
+      onChange={event => setText(event.target.value)}
+    />
+  )
+}
+```
+
+Не вызывайте setter во время рендера без строгой необходимости и не изменяйте объекты состояния напрямую. В Strict Mode функция-инициализатор может быть вызвана дважды в разработке для поиска нечистого кода.
+
+[Официальная документация `useState`](https://react.dev/reference/react/useState)

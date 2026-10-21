@@ -1,0 +1,82 @@
+---
+title: useRef
+description: useRef — хранение DOM-ссылки или изменяемого значения с тремя примерами.
+---
+
+# `useRef`
+
+`useRef` возвращает один и тот же объект между рендерами. Изменение `ref.current` не вызывает новый рендер, поэтому ref подходит для DOM-узлов и данных, не участвующих в отображении.
+
+```tsx
+const ref = useRef(initialValue)
+```
+
+Не читайте и не записывайте `ref.current` во время рендера, кроме предсказуемой однократной инициализации. Для отображаемых данных используйте состояние.
+
+## 1. Фокус на поле
+
+```tsx
+import { useRef } from 'react'
+
+export function Search() {
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  return (
+    <>
+      <input ref={inputRef} />
+      <button onClick={() => inputRef.current?.focus()}>Фокус</button>
+    </>
+  )
+}
+```
+
+## 2. Идентификатор таймера
+
+```tsx
+import { useRef } from 'react'
+
+export function DelayedAlert() {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function start() {
+    timerRef.current = setTimeout(() => alert('Готово'), 1000)
+  }
+
+  function cancel() {
+    if (timerRef.current) clearTimeout(timerRef.current)
+  }
+
+  return (
+    <>
+      <button onClick={start}>Запустить</button>
+      <button onClick={cancel}>Отмена</button>
+    </>
+  )
+}
+```
+
+## 3. Ленивая инициализация объекта
+
+```tsx
+import { useRef } from 'react'
+
+class Formatter {
+  format(value: number) {
+    return new Intl.NumberFormat('ru').format(value)
+  }
+}
+
+export function Price({ value }: { value: number }) {
+  const formatterRef = useRef<Formatter | null>(null)
+
+  if (formatterRef.current === null) {
+    formatterRef.current = new Formatter()
+  }
+
+  return <span>{formatterRef.current.format(value)} ₽</span>
+}
+```
+
+React устанавливает DOM-ref после commit и очищает его при размонтировании. Не используйте ref как скрытую замену однонаправленному потоку данных.
+
+[Официальная документация `useRef`](https://react.dev/reference/react/useRef)
