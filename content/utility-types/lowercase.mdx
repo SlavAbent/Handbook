@@ -1,0 +1,26 @@
+---
+title: "Lowercase<StringType>"
+description: "Lowercase: объяснение и практические примеры на TypeScript."
+---
+# `Lowercase<StringType>`
+
+Переводит строковые литералы в нижний регистр.
+
+```ts
+type Environment = Lowercase<'DEV' | 'STAGE' | 'PROD'>
+// 'dev' | 'stage' | 'prod'
+
+const environment: Environment = 'prod'
+```
+
+Можно нормализовать ограниченный набор команд на уровне типов:
+
+```ts
+type RawCommand = 'START' | 'STOP' | 'RESTART'
+type Command = Lowercase<RawCommand>
+
+function execute(command: Command) {}
+execute('restart')
+// @ts-expect-error требуется нижний регистр
+execute('START')
+```

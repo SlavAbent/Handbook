@@ -1,0 +1,35 @@
+---
+title: "Exclude<UnionType, ExcludedMembers>"
+description: "Exclude: объяснение и практические примеры на TypeScript."
+---
+# `Exclude<UnionType, ExcludedMembers>`
+
+Удаляет из объединения члены, совместимые с `ExcludedMembers`.
+
+```ts
+type Size = 'small' | 'medium' | 'large'
+type CompactSize = Exclude<Size, 'large'>
+
+const size: CompactSize = 'medium'
+// @ts-expect-error large был исключён
+const tooLarge: CompactSize = 'large'
+```
+
+Можно фильтровать объекты по их форме:
+
+```ts
+type Result =
+  | { status: 'success'; data: string }
+  | { status: 'error'; message: string }
+  | { status: 'loading' }
+
+type SettledResult = Exclude<Result, { status: 'loading' }>
+```
+
+Из смешанного объединения можно убрать функции:
+
+```ts
+type Value = string | number | (() => void)
+type SerializableValue = Exclude<Value, Function>
+// string | number
+```

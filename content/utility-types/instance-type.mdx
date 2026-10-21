@@ -1,0 +1,52 @@
+---
+title: "InstanceType<Type>"
+description: "InstanceType: объяснение и практические примеры на TypeScript."
+---
+# `InstanceType<Type>`
+
+Получает тип экземпляра из типа конструктора.
+
+```ts
+class Reader {
+  currentPage = 1
+  next() {
+    this.currentPage += 1
+  }
+}
+
+type ReaderInstance = InstanceType<typeof Reader>
+const reader: ReaderInstance = new Reader()
+```
+
+Полезно, когда конструктор передаётся отдельно от экземпляра:
+
+```ts
+class Cache {
+  get(key: string) {
+    return key
+  }
+}
+
+declare const CacheClass: typeof Cache
+type CacheObject = InstanceType<typeof CacheClass>
+
+function read(cache: CacheObject) {
+  return cache.get('chapter')
+}
+```
+
+С абстрактным классом результат остаётся типом экземпляра:
+
+```ts
+abstract class Document {
+  abstract render(): string
+}
+
+type DocumentInstance = InstanceType<typeof Document>
+
+class MarkdownDocument extends Document {
+  render() { return '# Глава' }
+}
+
+const document: DocumentInstance = new MarkdownDocument()
+```

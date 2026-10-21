@@ -1,0 +1,54 @@
+---
+title: "ThisType<Type>"
+description: "ThisType: объяснение и практические примеры на TypeScript."
+---
+# `ThisType<Type>`
+
+Маркер контекстного типа `this` внутри литерала объекта. Он требует включённого `noImplicitThis` — строгий режим включает эту настройку.
+
+```ts
+type Descriptor<Data, Methods> = {
+  data: Data
+  methods: Methods & ThisType<Data & Methods>
+}
+
+const counter: Descriptor<
+  { value: number },
+  { increment(): void }
+> = {
+  data: { value: 0 },
+  methods: {
+    increment() {
+      this.value += 1
+    }
+  }
+}
+```
+
+Пример фабрики объектов:
+
+```ts
+type ObjectOptions<D, M> = {
+  data: D
+  methods: M & ThisType<D & M>
+}
+
+function defineObject<D, M>(options: ObjectOptions<D, M>): D & M {
+  return { ...options.data, ...options.methods }
+}
+
+const timer = defineObject({
+  data: { seconds: 0 },
+  methods: {
+    tick() { this.seconds += 1 },
+    label() { return `${this.seconds} сек.` }
+  }
+})
+```
+
+`ThisType` не создаёт новый тип данных самостоятельно:
+
+```ts
+type ContextMarker = ThisType<{ id: string }>
+// Маркер влияет на контекст this только внутри подходящего объектного литерала.
+```

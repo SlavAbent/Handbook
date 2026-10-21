@@ -1,0 +1,38 @@
+---
+title: "Record<Keys, Type>"
+description: "Record: объяснение и практические примеры на TypeScript."
+---
+# `Record<Keys, Type>`
+
+Создаёт объект с ключами `Keys` и одинаковым типом значений `Type`.
+
+```ts
+type Role = 'admin' | 'editor' | 'reader'
+
+const labels: Record<Role, string> = {
+  admin: 'Администратор',
+  editor: 'Редактор',
+  reader: 'Читатель'
+}
+```
+
+Компилятор контролирует полноту словаря:
+
+```ts
+type Status = 'idle' | 'loading' | 'success'
+type StatusView = { label: string; color: string }
+
+const views: Record<Status, StatusView> = {
+  idle: { label: 'Ожидание', color: 'gray' },
+  loading: { label: 'Загрузка', color: 'blue' },
+  success: { label: 'Готово', color: 'green' }
+}
+```
+
+Для произвольных строк `Record` описывает индексируемый объект:
+
+```ts
+const counters: Record<string, number> = {}
+counters.views = 12
+counters.likes = 3
+```

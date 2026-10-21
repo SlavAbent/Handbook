@@ -1,0 +1,31 @@
+---
+title: "Capitalize<StringType>"
+description: "Capitalize: объяснение и практические примеры на TypeScript."
+---
+# `Capitalize<StringType>`
+
+Делает первый символ каждого строкового литерала прописным.
+
+```ts
+type Field = 'name' | 'email'
+type Getter = `get${Capitalize<Field>}`
+// 'getName' | 'getEmail'
+
+const getter: Getter = 'getName'
+```
+
+Типизированные подписи можно получить из машинных ключей:
+
+```ts
+type Section = 'introduction' | 'examples' | 'summary'
+type SectionTitle = Capitalize<Section>
+
+const title: SectionTitle = 'Introduction'
+```
+
+Утилита меняет только первый символ:
+
+```ts
+type Phrase = Capitalize<'typeScript handbook'>
+// 'TypeScript handbook'
+```

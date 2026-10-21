@@ -1,0 +1,38 @@
+---
+title: "Awaited<Type>"
+description: "Awaited: объяснение и практические примеры на TypeScript."
+---
+# `Awaited<Type>`
+
+Рекурсивно извлекает значение из `Promise` и других thenable-типов.
+
+```ts
+type Text = Awaited<Promise<string>>
+// string
+
+type DeepNumber = Awaited<Promise<Promise<number>>>
+// number
+```
+
+Практический пример с асинхронной функцией:
+
+```ts
+async function loadChapter() {
+  return { slug: 'partial', title: 'Partial<Type>' }
+}
+
+type Chapter = Awaited<ReturnType<typeof loadChapter>>
+
+const chapter: Chapter = {
+  slug: 'partial',
+  title: 'Partial<Type>'
+}
+```
+
+Утилита распределяется по объединениям и оставляет не-Promise значения без изменений:
+
+```ts
+type MaybeAsync = boolean | Promise<number>
+type Resolved = Awaited<MaybeAsync>
+// boolean | number
+```

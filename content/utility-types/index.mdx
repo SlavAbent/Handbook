@@ -1,0 +1,66 @@
+---
+title: Utility Types
+description: Каталог всех встроенных служебных типов TypeScript.
+---
+
+# Utility Types
+
+Utility Types — глобально доступные типы для распространённых преобразований. Их не нужно импортировать: определения поставляются вместе с TypeScript. Выберите утилиту — каждая открывается как отдельная страница с объяснением и примерами.
+
+Перечень и поведение сверены с <a className="official-reference" href="https://www.typescriptlang.org/docs/handbook/utility-types.html">официальным справочником TypeScript</a>.
+
+## Объекты
+
+<div className="utility-grid">
+  <a href="/utility-types/partial"><code>Partial&lt;Type&gt;</code><span>Делает свойства необязательными</span></a>
+  <a href="/utility-types/required"><code>Required&lt;Type&gt;</code><span>Делает свойства обязательными</span></a>
+  <a href="/utility-types/readonly"><code>Readonly&lt;Type&gt;</code><span>Запрещает переназначение свойств</span></a>
+  <a href="/utility-types/record"><code>Record&lt;Keys, Type&gt;</code><span>Создаёт типизированный словарь</span></a>
+  <a href="/utility-types/pick"><code>Pick&lt;Type, Keys&gt;</code><span>Выбирает указанные свойства</span></a>
+  <a href="/utility-types/omit"><code>Omit&lt;Type, Keys&gt;</code><span>Исключает указанные свойства</span></a>
+</div>
+
+## Объединения
+
+<div className="utility-grid">
+  <a href="/utility-types/exclude"><code>Exclude&lt;Union, Members&gt;</code><span>Исключает члены объединения</span></a>
+  <a href="/utility-types/extract"><code>Extract&lt;Type, Union&gt;</code><span>Оставляет совместимые члены</span></a>
+  <a href="/utility-types/non-nullable"><code>NonNullable&lt;Type&gt;</code><span>Удаляет null и undefined</span></a>
+</div>
+
+## Функции и конструкторы
+
+<div className="utility-grid">
+  <a href="/utility-types/parameters"><code>Parameters&lt;Type&gt;</code><span>Извлекает параметры функции</span></a>
+  <a href="/utility-types/return-type"><code>ReturnType&lt;Type&gt;</code><span>Извлекает результат функции</span></a>
+  <a href="/utility-types/constructor-parameters"><code>ConstructorParameters&lt;Type&gt;</code><span>Извлекает параметры конструктора</span></a>
+  <a href="/utility-types/instance-type"><code>InstanceType&lt;Type&gt;</code><span>Получает тип экземпляра</span></a>
+</div>
+
+## Контекст `this`
+
+<div className="utility-grid">
+  <a href="/utility-types/this-parameter-type"><code>ThisParameterType&lt;Type&gt;</code><span>Извлекает тип this</span></a>
+  <a href="/utility-types/omit-this-parameter"><code>OmitThisParameter&lt;Type&gt;</code><span>Удаляет параметр this</span></a>
+  <a href="/utility-types/this-type"><code>ThisType&lt;Type&gt;</code><span>Задаёт контекстный this</span></a>
+</div>
+
+## Строки
+
+<div className="utility-grid">
+  <a href="/utility-types/uppercase"><code>Uppercase&lt;StringType&gt;</code><span>Верхний регистр</span></a>
+  <a href="/utility-types/lowercase"><code>Lowercase&lt;StringType&gt;</code><span>Нижний регистр</span></a>
+  <a href="/utility-types/capitalize"><code>Capitalize&lt;StringType&gt;</code><span>Прописной первый символ</span></a>
+  <a href="/utility-types/uncapitalize"><code>Uncapitalize&lt;StringType&gt;</code><span>Строчный первый символ</span></a>
+</div>
+
+## Асинхронность и вывод типов
+
+<div className="utility-grid">
+  <a href="/utility-types/awaited"><code>Awaited&lt;Type&gt;</code><span>Разворачивает Promise</span></a>
+  <a href="/utility-types/no-infer"><code>NoInfer&lt;Type&gt;</code><span>Управляет выводом generic-типа</span></a>
+</div>
+
+## Важное ограничение
+
+Utility Types существуют только во время проверки типов. Они не фильтруют поля объекта и не изменяют значения в JavaScript.

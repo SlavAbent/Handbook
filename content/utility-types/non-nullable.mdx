@@ -1,0 +1,34 @@
+---
+title: "NonNullable<Type>"
+description: "NonNullable: объяснение и практические примеры на TypeScript."
+---
+# `NonNullable<Type>`
+
+Исключает из типа `null` и `undefined`.
+
+```ts
+type MaybeName = string | null | undefined
+type Name = NonNullable<MaybeName>
+
+const name: Name = 'TypeScript'
+// @ts-expect-error null исключён
+const empty: Name = null
+```
+
+Утилита помогает получить обязательный тип вложенного значения:
+
+```ts
+interface ApiResponse {
+  user?: { id: string; name: string } | null
+}
+
+type ApiUser = NonNullable<ApiResponse['user']>
+const user: ApiUser = { id: '7', name: 'Олег' }
+```
+
+Она не удаляет `null` из вложенных полей:
+
+```ts
+type Container = NonNullable<{ value: string | null } | null>
+const container: Container = { value: null } // допустимо
+```

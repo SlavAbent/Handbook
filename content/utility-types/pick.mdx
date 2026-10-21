@@ -1,0 +1,37 @@
+---
+title: "Pick<Type, Keys>"
+description: "Pick: объяснение и практические примеры на TypeScript."
+---
+# `Pick<Type, Keys>`
+
+Создаёт тип только из выбранных свойств `Type`. `Keys` должен входить в `keyof Type`.
+
+```ts
+interface Account {
+  id: string
+  name: string
+  email: string
+  passwordHash: string
+}
+
+type PublicAccount = Pick<Account, 'id' | 'name'>
+
+const author: PublicAccount = { id: 'u1', name: 'Лев' }
+```
+
+Через `Pick` удобно задавать минимальный контракт функции:
+
+```ts
+function avatarLabel(user: Pick<Account, 'name' | 'email'>) {
+  return `${user.name} <${user.email}>`
+}
+
+avatarLabel({ name: 'Мира', email: 'mira@example.com' })
+```
+
+Нельзя выбрать отсутствующее поле:
+
+```ts
+// @ts-expect-error поле age отсутствует в Account
+type WrongAccount = Pick<Account, 'id' | 'age'>
+```

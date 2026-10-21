@@ -1,0 +1,59 @@
+---
+title: "NoInfer<Type>"
+description: "NoInfer: объяснение и практические примеры на TypeScript."
+---
+# `NoInfer<Type>`
+
+Запрещает конкретному месту участвовать в выводе `Type`, но не меняет сам итоговый тип. Утилита доступна начиная с TypeScript 5.4.
+
+```ts
+function choose<C extends string>(
+  options: C[],
+  fallback: NoInfer<C>
+) {
+  return options.includes(fallback) ? fallback : options[0]
+}
+
+choose(['light', 'dark'], 'light')
+// @ts-expect-error sepia отсутствует в options
+choose(['light', 'dark'], 'sepia')
+```
+
+Без `NoInfer` второй аргумент может нежелательно расширить выводимый union:
+
+```ts
+function createFSM<State extends string>(config: {
+  states: State[]
+  initial: NoInfer<State>
+}) {
+  return config
+}
+
+createFSM({
+  states: ['idle', 'loading', 'success'],
+  initial: 'idle'
+})
+
+createFSM({
+  states: ['idle', 'loading'],
+  // @ts-expect-error error не объявлен в states
+  initial: 'error'
+})
+```
+
+Другой источник вывода можно оставить главным:
+
+```ts
+function fill<T>(value: T, items: NoInfer<T>[]): T[] {
+  return items.length ? items : [value]
+}
+
+fill(1, [2, 3])
+// @ts-expect-error T выведен как number из первого аргумента
+fill(1, ['2', '3'])
+```
+
+## Когда выбирать какую утилиту
+
+- Используйте `Awaited`, когда тип результата должен совпадать со значением после `await`.
+- Используйте `NoInfer`, когда один аргумент должен проверяться относительно generic-типа, но не расширять его.

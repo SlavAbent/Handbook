@@ -1,0 +1,35 @@
+---
+title: "Required<Type>"
+description: "Required: объяснение и практические примеры на TypeScript."
+---
+# `Required<Type>`
+
+Делает все необязательные поля обязательными. Это противоположность `Partial`.
+
+```ts
+interface DraftArticle {
+  title?: string
+  body?: string
+}
+
+type PublishedArticle = Required<DraftArticle>
+
+const article: PublishedArticle = { title: 'Типы', body: 'Текст главы' }
+```
+
+Так можно отделить ввод пользователя от проверенной конфигурации:
+
+```ts
+interface Options {
+  cache?: boolean
+  retries?: number
+}
+
+function run(options: Required<Options>) {
+  return options.cache ? options.retries : 0
+}
+
+run({ cache: true, retries: 3 })
+// @ts-expect-error поле retries пропущено
+run({ cache: false })
+```

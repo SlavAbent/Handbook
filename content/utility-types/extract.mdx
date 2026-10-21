@@ -1,0 +1,34 @@
+---
+title: "Extract<Type, Union>"
+description: "Extract: объяснение и практические примеры на TypeScript."
+---
+# `Extract<Type, Union>`
+
+Оставляет только члены `Type`, совместимые с `Union`. Это обратная операция по отношению к `Exclude`.
+
+```ts
+type EventName = 'click' | 'focus' | 'app:open' | 'app:close'
+type AppEvent = Extract<EventName, `app:${string}`>
+
+const event: AppEvent = 'app:open'
+```
+
+Выбор варианта дискриминированного объединения:
+
+```ts
+type Shape =
+  | { kind: 'circle'; radius: number }
+  | { kind: 'square'; side: number }
+  | { kind: 'rectangle'; width: number; height: number }
+
+type Circle = Extract<Shape, { kind: 'circle' }>
+const circle: Circle = { kind: 'circle', radius: 4 }
+```
+
+Можно оставить вызываемые значения:
+
+```ts
+type Mixed = string | { id: number } | ((id: number) => string)
+type Handler = Extract<Mixed, (...args: never[]) => unknown>
+// (id: number) => string
+```

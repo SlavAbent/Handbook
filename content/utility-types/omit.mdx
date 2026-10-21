@@ -1,0 +1,40 @@
+---
+title: "Omit<Type, Keys>"
+description: "Omit: объяснение и практические примеры на TypeScript."
+---
+# `Omit<Type, Keys>`
+
+Копирует `Type`, исключая выбранные свойства. Часто используется для безопасных публичных моделей.
+
+```ts
+interface UserRecord {
+  id: string
+  email: string
+  passwordHash: string
+}
+
+type SafeUser = Omit<UserRecord, 'passwordHash'>
+
+const safe: SafeUser = { id: 'u2', email: 'user@example.com' }
+```
+
+Можно исключить сразу несколько полей:
+
+```ts
+interface ServerEntity {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+  title: string
+}
+
+type NewEntity = Omit<ServerEntity, 'id' | 'createdAt' | 'updatedAt'>
+const input: NewEntity = { title: 'Новая глава' }
+```
+
+В отличие от `Pick`, имя исключаемого ключа не обязано входить в `keyof Type`:
+
+```ts
+type SameUser = Omit<UserRecord, 'missing'>
+// Результат эквивалентен UserRecord
+```

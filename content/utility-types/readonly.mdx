@@ -1,0 +1,36 @@
+---
+title: "Readonly<Type>"
+description: "Readonly: объяснение и практические примеры на TypeScript."
+---
+# `Readonly<Type>`
+
+Запрещает переназначать свойства через полученный тип.
+
+```ts
+interface Point {
+  x: number
+  y: number
+}
+
+const origin: Readonly<Point> = { x: 0, y: 0 }
+// @ts-expect-error свойство доступно только для чтения
+origin.x = 10
+```
+
+Подходит для входных параметров, которые функция не должна менять:
+
+```ts
+function formatUser(user: Readonly<{ name: string; age: number }>) {
+  // @ts-expect-error функция не может изменить объект через user
+  user.age += 1
+  return `${user.name}, ${user.age}`
+}
+```
+
+Как и `Partial`, утилита неглубокая:
+
+```ts
+const state: Readonly<{ tags: string[] }> = { tags: [] }
+state.tags.push('typescript') // допустимо: сам массив не ReadonlyArray
+// state.tags = [] — ошибка: поле переназначить нельзя
+```

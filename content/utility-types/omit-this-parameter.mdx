@@ -1,0 +1,31 @@
+---
+title: "OmitThisParameter<Type>"
+description: "OmitThisParameter: объяснение и практические примеры на TypeScript."
+---
+# `OmitThisParameter<Type>`
+
+Удаляет явный `this` из сигнатуры. Обычно применяется к результату `bind`.
+
+```ts
+function toLabel(this: { prefix: string }, id: number) {
+  return `${this.prefix}-${id}`
+}
+
+const toBookLabel: OmitThisParameter<typeof toLabel> =
+  toLabel.bind({ prefix: 'BOOK' })
+
+toBookLabel(42)
+```
+
+Связанную функцию можно безопасно передать как callback:
+
+```ts
+function multiply(this: { factor: number }, value: number) {
+  return value * this.factor
+}
+
+const double: OmitThisParameter<typeof multiply> =
+  multiply.bind({ factor: 2 })
+
+const result = [1, 2, 3].map(double) // [2, 4, 6]
+```

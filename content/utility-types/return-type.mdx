@@ -1,0 +1,42 @@
+---
+title: "ReturnType<Type>"
+description: "ReturnType: объяснение и практические примеры на TypeScript."
+---
+# `ReturnType<Type>`
+
+Извлекает тип возвращаемого значения функции.
+
+```ts
+function loadProfile() {
+  return { id: '1', name: 'Лина', roles: ['reader'] }
+}
+
+type Profile = ReturnType<typeof loadProfile>
+const profile: Profile = { id: '2', name: 'Роман', roles: [] }
+```
+
+Так потребитель остаётся синхронизирован с фабрикой:
+
+```ts
+const createState = () => ({
+  count: 0,
+  status: 'idle' as 'idle' | 'loading'
+})
+
+type State = ReturnType<typeof createState>
+
+function reset(): State {
+  return createState()
+}
+```
+
+Для `async`-функции `ReturnType` возвращает Promise. Чтобы извлечь результат, добавьте `Awaited`:
+
+```ts
+async function fetchTitle() {
+  return { title: 'Utility Types' }
+}
+
+type Request = ReturnType<typeof fetchTitle> // Promise<{ title: string }>
+type Response = Awaited<Request> // { title: string }
+```

@@ -1,0 +1,42 @@
+---
+title: "ConstructorParameters<Type>"
+description: "ConstructorParameters: объяснение и практические примеры на TypeScript."
+---
+# `ConstructorParameters<Type>`
+
+Извлекает параметры конструктора в tuple-тип.
+
+```ts
+class Book {
+  constructor(
+    public title: string,
+    public pages: number
+  ) {}
+}
+
+type BookArgs = ConstructorParameters<typeof Book>
+const args: BookArgs = ['Справочник TypeScript', 320]
+const book = new Book(...args)
+```
+
+Универсальная фабрика может переиспользовать сигнатуру конкретного класса:
+
+```ts
+class Notice {
+  constructor(public message: string, public level: 'info' | 'error') {}
+}
+
+function createNotice(...args: ConstructorParameters<typeof Notice>) {
+  return new Notice(...args)
+}
+
+createNotice('Глава сохранена', 'info')
+```
+
+Утилита работает и со встроенными конструкторами:
+
+```ts
+type DateArgs = ConstructorParameters<DateConstructor>
+const dateArgs: DateArgs = [2026, 9, 21]
+const date = new Date(...dateArgs)
+```

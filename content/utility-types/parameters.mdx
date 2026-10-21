@@ -1,0 +1,39 @@
+---
+title: "Parameters<Type>"
+description: "Parameters: объяснение и практические примеры на TypeScript."
+---
+# `Parameters<Type>`
+
+Возвращает параметры функции как tuple-тип, сохраняя имена и необязательность аргументов.
+
+```ts
+function createUser(name: string, age: number, active = true) {
+  return { name, age, active }
+}
+
+type CreateUserArgs = Parameters<typeof createUser>
+// [name: string, age: number, active?: boolean]
+
+const args: CreateUserArgs = ['Ася', 28]
+createUser(...args)
+```
+
+Можно построить универсальную обёртку без повторения параметров:
+
+```ts
+function search(query: string, limit: number): string[] {
+  return [`${query}:${limit}`]
+}
+
+function loggedSearch(...args: Parameters<typeof search>) {
+  console.log('search', args)
+  return search(...args)
+}
+```
+
+Для функции без аргументов результатом будет пустой tuple:
+
+```ts
+type NoArgs = Parameters<() => void> // []
+const noArgs: NoArgs = []
+```

@@ -1,0 +1,24 @@
+---
+title: "Uppercase<StringType>"
+description: "Uppercase: объяснение и практические примеры на TypeScript."
+---
+# `Uppercase<StringType>`
+
+Переводит каждый символ строкового литерала в верхний регистр.
+
+```ts
+type Method = Uppercase<'get' | 'post' | 'delete'>
+// 'GET' | 'POST' | 'DELETE'
+
+const method: Method = 'POST'
+```
+
+С template literal type можно сформировать имена констант:
+
+```ts
+type Domain = 'user' | 'book'
+type Action = 'created' | 'deleted'
+type EventConstant = Uppercase<`${Domain}_${Action}`>
+
+const event: EventConstant = 'BOOK_CREATED'
+```

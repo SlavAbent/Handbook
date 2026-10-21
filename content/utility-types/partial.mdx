@@ -1,0 +1,45 @@
+---
+title: "Partial<Type>"
+description: "Partial: объяснение и практические примеры на TypeScript."
+---
+# `Partial<Type>`
+
+Делает все свойства `Type` необязательными. Удобен для частичных обновлений.
+
+```ts
+interface Profile {
+  name: string
+  city: string
+  notifications: boolean
+}
+
+type ProfilePatch = Partial<Profile>
+
+const patch: ProfilePatch = { city: 'Екатеринбург' }
+```
+
+Функция обновления принимает только изменившиеся поля:
+
+```ts
+function updateProfile(current: Profile, patch: Partial<Profile>): Profile {
+  return { ...current, ...patch }
+}
+
+updateProfile(
+  { name: 'Ирина', city: 'Пермь', notifications: true },
+  { city: 'Казань' }
+)
+```
+
+`Partial` работает только на первом уровне:
+
+```ts
+interface Settings {
+  theme: { mode: 'light' | 'dark'; contrast: number }
+}
+
+const settings: Partial<Settings> = {
+  // @ts-expect-error contrast всё ещё обязателен внутри theme
+  theme: { mode: 'dark' }
+}
+```

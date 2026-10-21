@@ -1,0 +1,33 @@
+---
+title: "ThisParameterType<Type>"
+description: "ThisParameterType: объяснение и практические примеры на TypeScript."
+---
+# `ThisParameterType<Type>`
+
+Извлекает тип явно объявленного параметра `this`. Если параметра нет, результатом будет `unknown`.
+
+```ts
+function formatPrice(this: { currency: string }, value: number) {
+  return `${value} ${this.currency}`
+}
+
+type PriceContext = ThisParameterType<typeof formatPrice>
+const context: PriceContext = { currency: '₽' }
+
+formatPrice.call(context, 500)
+```
+
+Контекст можно использовать в отдельной функции-адаптере:
+
+```ts
+function greet(this: { name: string }, greeting: string) {
+  return `${greeting}, ${this.name}`
+}
+
+function greetPerson(
+  person: ThisParameterType<typeof greet>,
+  greeting: string
+) {
+  return greet.call(person, greeting)
+}
+```

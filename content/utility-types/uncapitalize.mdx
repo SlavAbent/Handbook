@@ -1,0 +1,36 @@
+---
+title: "Uncapitalize<StringType>"
+description: "Uncapitalize: объяснение и практические примеры на TypeScript."
+---
+# `Uncapitalize<StringType>`
+
+Делает первый символ строкового литерала строчным.
+
+```ts
+type ComponentName = 'Button' | 'Dialog' | 'Sidebar'
+type RegistryKey = Uncapitalize<ComponentName>
+// 'button' | 'dialog' | 'sidebar'
+
+const key: RegistryKey = 'dialog'
+```
+
+Подходит для преобразования имён событий:
+
+```ts
+type EventClass = 'Open' | 'Close' | 'Save'
+type HandlerName = `on${EventClass}`
+type DataAttribute = `data-${Uncapitalize<EventClass>}`
+
+const attribute: DataAttribute = 'data-save'
+```
+
+Как и `Capitalize`, утилита затрагивает только первый символ:
+
+```ts
+type Word = Uncapitalize<'XMLParser'>
+// 'xMLParser'
+```
+
+## Как выполняется преобразование
+
+Эти четыре типа используют внутренние строковые операции JavaScript и не зависят от локали. Они не вызывают код во время выполнения.
