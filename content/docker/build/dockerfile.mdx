@@ -1,0 +1,115 @@
+---
+title: Первый Dockerfile
+description: Пошаговая упаковка простого Node.js-сервера в Docker image.
+---
+
+# Первый Dockerfile
+
+У нас уже есть работающий `server.js`. Теперь опишем окружение, в котором он должен запускаться. Dockerfile — обычный текстовый файл без расширения с последовательностью инструкций сборки.
+
+## Шаг 1. Минимальный файл
+
+В папке `docker-hello` создайте файл `Dockerfile`:
+
+```dockerfile
+FROM node:24-alpine
+
+WORKDIR /app
+
+COPY package.json ./
+COPY server.js ./
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+```
+
+## Разбор каждой инструкции
+
+### `FROM node:24-alpine`
+
+Берём готовый image с Node.js 24. Вариант Alpine сравнительно небольшой. Любой Dockerfile начинается со стадии `FROM`.
+
+### `WORKDIR /app`
+
+Создаёт рабочую директорию внутри image и делает её текущей для следующих инструкций. Это не папка вашего компьютера.
+
+### `COPY ...`
+
+Копирует файлы из build context внутрь image:
+
+```text
+компьютер              image
+package.json    →      /app/package.json
+server.js       →      /app/server.js
+```
+
+### `EXPOSE 3000`
+
+Документирует, что приложение слушает порт `3000`. Эта инструкция сама не открывает порт на компьютере — для этого при запуске нужен `--publish`.
+
+### `CMD ["npm", "start"]`
+
+Задаёт основной процесс container. Когда `npm start` завершается, container останавливается.
+
+## Шаг 2. Собираем image
+
+Из папки рядом с Dockerfile:
+
+```bash
+docker build --tag docker-hello:1.0 .
+```
+
+Разбор:
+
+- `build` — начать сборку;
+- `--tag docker-hello:1.0` — дать image имя и tag;
+- `.` — использовать текущую папку как build context.
+
+Проверьте результат:
+
+```bash
+docker image ls docker-hello
+```
+
+## Шаг 3. Запускаем container
+
+```bash
+docker run \
+  --name docker-hello \
+  --publish 3000:3000 \
+  docker-hello:1.0
+```
+
+В другом терминале:
+
+```bash
+curl http://localhost:3000
+```
+
+Ожидаемый ответ:
+
+```text
+Привет из Node.js!
+```
+
+Нажмите `Ctrl+C`, затем удалите остановленный container:
+
+```bash
+docker rm docker-hello
+```
+
+## Почему изменение кода не видно сразу
+
+`COPY server.js ./` сохранил снимок файла внутри image. После изменения `server.js` старый image не меняется. Соберите новый tag и запустите новый container:
+
+```bash
+docker build --tag docker-hello:1.1 .
+docker run --rm --publish 3000:3000 docker-hello:1.1
+```
+
+Позже для разработки мы подключим исходный код через bind mount, а для production научимся собирать компактный multi-stage image.
+
+[Официальный справочник Dockerfile](https://docs.docker.com/reference/dockerfile/)
+
+[Далее: build context и `.dockerignore` →](/docker/build/dockerignore)

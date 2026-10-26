@@ -1,0 +1,80 @@
+---
+title: Сети и порты
+description: Docker networks, DNS между контейнерами и публикация портов.
+---
+
+# Сети и порты
+
+У container есть собственное сетевое пространство. Из-за этого слово `localhost` всегда означает «этот же container», а не ваш компьютер и не соседний container.
+
+Нужно различать два направления связи:
+
+```text
+браузер на компьютере → опубликованный порт → container
+container             → Docker network     → другой container
+```
+
+## Порт для браузера
+
+Мы уже использовали:
+
+```bash
+docker run --rm --publish 8080:80 nginx:alpine
+```
+
+Числа читаются слева направо:
+
+```text
+localhost:8080 → container:80
+```
+
+Если приложение внутри container слушает `3000`, команда должна быть `--publish 3000:3000` или, например, `--publish 8080:3000`.
+
+## Пользовательская сеть
+
+```bash
+docker network create handbook-network
+
+docker run --name database \
+  --network handbook-network \
+  --detach \
+  --env POSTGRES_PASSWORD=development-only \
+  postgres:17-alpine
+
+docker run --name api \
+  --network handbook-network \
+  --detach \
+  --env DATABASE_URL=postgresql://postgres:development-only@database:5432/postgres \
+  handbook-api:1.0
+```
+
+Внутри `api` хост базы — `database`, а не `localhost`. Docker DNS превращает имя `database` в адрес нужного container.
+
+## Публикация порта
+
+```bash
+docker run --detach \
+  --name web \
+  --publish 127.0.0.1:3000:3000 \
+  handbook:1.0
+```
+
+Формат: `[адрес_хоста:]порт_хоста:порт_контейнера`. Привязка к `127.0.0.1` ограничивает доступ текущим компьютером. Это полезный безопасный default для локальной базы или административного интерфейса.
+
+## Диагностика
+
+```bash
+docker network inspect handbook-network
+docker port web
+docker exec api getent hosts database
+```
+
+Не полагайтесь на изменяемый IP контейнера. Используйте DNS-имя сервиса и корректно обрабатывайте временную недоступность зависимости.
+
+## Внутренний и внешний доступ
+
+PostgreSQL не нужно публиковать на хост, если к нему обращаются только контейнеры Compose. Отсутствие `ports` не мешает связи внутри общей сети и уменьшает поверхность атаки.
+
+[Официальная документация Docker networking](https://docs.docker.com/engine/network/)
+
+[Далее: объединяем сервисы через Docker Compose →](/docker/compose/docker-compose)

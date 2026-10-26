@@ -1,0 +1,86 @@
+---
+title: Переменные окружения
+description: Runtime-конфигурация контейнеров и интерполяция Compose.
+---
+
+# Переменные окружения
+
+Порт, адрес базы и режим приложения меняются между компьютерами и окружениями. Если записать их прямо в image, для каждого изменения придётся пересобирать приложение. Переменные окружения позволяют передать конфигурацию при запуске.
+
+В Compose есть два похожих, но разных механизма:
+
+1. Compose читает значение и подставляет его в `compose.yaml`.
+2. Compose передаёт значение процессу внутри container.
+
+Файл `.env` прежде всего предоставляет значения для подстановки. Внутрь container попадает только то, что указано через `environment` или `env_file`.
+
+## Интерполяция
+
+`.env`:
+
+```dotenv
+APP_PORT=3000
+POSTGRES_DB=handbook
+```
+
+`compose.yaml`:
+
+```yaml
+services:
+  web:
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_NAME: ${POSTGRES_DB:?POSTGRES_DB is required}
+```
+
+Формы `${NAME:-default}` и `${NAME:?message}` задают fallback и обязательное значение.
+
+Проверьте подстановку до запуска:
+
+```bash
+docker compose config
+```
+
+Если `POSTGRES_DB` отсутствует, `${POSTGRES_DB:?POSTGRES_DB is required}` остановит Compose с понятной ошибкой вместо запуска с пустой конфигурацией.
+
+## `environment` и `env_file`
+
+```yaml
+services:
+  web:
+    env_file:
+      - path: ./config/web.env
+        required: true
+    environment:
+      LOG_LEVEL: info
+```
+
+Явное значение в `environment` имеет приоритет над таким же ключом из `env_file`. Проверьте итог:
+
+```bash
+docker compose config
+docker compose run --rm web env
+```
+
+## Build-time и runtime
+
+```yaml
+services:
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_API_ORIGIN: ${PUBLIC_API_ORIGIN}
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+```
+
+`build.args` доступны при сборке и могут влиять на клиентский bundle. `environment` передаётся при запуске. Переменные `NEXT_PUBLIC_*` становятся публичными в браузере — никогда не храните в них секреты.
+
+`.env` не является защищённым хранилищем. Не коммитьте production-пароли; для чувствительных данных используйте secret manager или Compose secrets.
+
+[Документация переменных Compose](https://docs.docker.com/compose/how-tos/environment-variables/)
+
+[Далее: передаём чувствительные данные через secrets →](/docker/compose/secrets)

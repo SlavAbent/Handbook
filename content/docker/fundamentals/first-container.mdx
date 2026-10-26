@@ -1,0 +1,80 @@
+---
+title: Первый контейнер
+description: Пошаговый запуск hello-world и веб-сервера Nginx.
+---
+
+# Первый контейнер
+
+Начнём с готовых images. Так можно увидеть работу Docker до изучения Dockerfile и сборки.
+
+## Шаг 1. Проверочный container
+
+```bash
+docker run --rm hello-world
+```
+
+Разберём команду:
+
+- `docker` — программа командной строки;
+- `run` — создать и запустить новый container;
+- `--rm` — удалить container после завершения;
+- `hello-world` — имя image.
+
+Если image отсутствует локально, Docker скачает его из Docker Hub. Программа внутри выведет объяснение и завершится. Container тоже остановится, потому что его основной процесс закончил работу.
+
+## Шаг 2. Запускаем веб-сервер
+
+```bash
+docker run \
+  --name first-web \
+  --detach \
+  --publish 8080:80 \
+  nginx:alpine
+```
+
+Что добавилось:
+
+- `--name first-web` — понятное имя container;
+- `--detach` — работа в фоне, чтобы терминал остался свободен;
+- `--publish 8080:80` — порт `8080` компьютера направляется на порт `80` container;
+- `nginx:alpine` — image Nginx на небольшой базе Alpine Linux.
+
+Откройте `http://localhost:8080`. Должна появиться стандартная страница Nginx.
+
+## Шаг 3. Проверяем состояние
+
+```bash
+docker ps
+```
+
+Ожидайте строку с именем `first-web`, состоянием `Up` и портом `0.0.0.0:8080->80/tcp` или похожей записью.
+
+Посмотрите логи:
+
+```bash
+docker logs first-web
+```
+
+После открытия страницы в логах появится HTTP-запрос.
+
+## Шаг 4. Останавливаем и удаляем
+
+```bash
+docker stop first-web
+docker ps --all
+docker rm first-web
+```
+
+`stop` завершает процесс, но сохраняет container. Поэтому он виден с `--all`. `rm` удаляет остановленный container, но image `nginx:alpine` остаётся и может использоваться снова.
+
+## Если порт занят
+
+Ошибка `port is already allocated` означает, что порт `8080` уже используется. Выберите другой порт компьютера:
+
+```bash
+docker run --rm --publish 8081:80 nginx:alpine
+```
+
+Теперь страница доступна на `http://localhost:8081`.
+
+[Далее: чем image отличается от container →](/docker/fundamentals/images-and-containers)

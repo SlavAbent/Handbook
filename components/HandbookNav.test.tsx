@@ -34,6 +34,20 @@ describe('HandbookNav', () => {
     expect(screen.getByRole('link', { name: 'Pick' })).toHaveAttribute('aria-current', 'page')
   })
 
+  it('shows Docker topics and marks the current page', () => {
+    usePathname.mockReturnValue('/docker/compose/docker-compose')
+    render(<HandbookNav />)
+
+    expect(screen.getByRole('navigation', { name: 'Список Docker' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Docker Compose' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    )
+    expect(screen.getByRole('link', { name: 'Dockerfile' })).not.toHaveAttribute(
+      'aria-current'
+    )
+  })
+
   it('renders nothing outside catalog pages', () => {
     usePathname.mockReturnValue('/react')
     const { container } = render(<HandbookNav />)

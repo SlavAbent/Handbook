@@ -40,4 +40,17 @@ describe('UtilitySearch', () => {
     expect(screen.getByText('Ничего не найдено')).toBeInTheDocument()
     rerender(<UtilitySearch />)
   })
+
+  it('searches Docker topics by name and Russian description', () => {
+    render(<UtilitySearch />)
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'постоянные данные' } })
+
+    expect(screen.getByRole('option', { name: /Volumes и bind mounts/ })).toHaveAttribute(
+      'href',
+      '/docker/storage-and-networking/volumes'
+    )
+
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'Dockerfile' } })
+    expect(screen.getByRole('option', { name: /Dockerfile/ })).toBeInTheDocument()
+  })
 })

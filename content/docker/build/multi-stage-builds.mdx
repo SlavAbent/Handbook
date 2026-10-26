@@ -1,0 +1,114 @@
+---
+title: Multi-stage builds
+description: Пошаговое разделение сборки и запуска production-приложения.
+---
+
+# Multi-stage builds
+
+Во время сборки нужны компиляторы, TypeScript, линтеры и dev-зависимости. Во время запуска нужен только готовый результат. Если оставить всё в одном image, он будет больше и получит лишние инструменты.
+
+Multi-stage build использует несколько `FROM` в одном Dockerfile:
+
+```text
+стадия build                 стадия runtime
+├── исходный код             ├── Node.js
+├── dev-зависимости    →     └── готовый результат
+└── результат сборки
+```
+
+## Минимальная идея
+
+```dockerfile
+FROM node:24-alpine AS build
+WORKDIR /app
+COPY . .
+RUN npm run build
+
+FROM node:24-alpine AS runtime
+WORKDIR /app
+COPY --from=build /app/dist ./dist
+CMD ["node", "dist/server.js"]
+```
+
+Первая стадия называется `build`. Вторая получает только `/app/dist` через `COPY --from=build`. Исходники и инструменты сборки не переносятся автоматически.
+
+## Next.js standalone по шагам
+
+Для примера предполагается `output: 'standalone'` в `next.config`. Сначала устанавливаем зависимости:
+
+```dockerfile
+# syntax=docker/dockerfile:1
+FROM node:24-alpine AS dependencies
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
+RUN corepack enable \
+  && pnpm install --frozen-lockfile
+```
+
+Затем собираем приложение:
+
+```dockerfile
+FROM node:24-alpine AS build
+WORKDIR /app
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY . .
+RUN corepack enable \
+  && pnpm build
+```
+
+Наконец создаём runtime image:
+
+```dockerfile
+FROM node:24-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 nextjs
+
+COPY --from=build --chown=nextjs:nodejs \
+  /app/.next/standalone ./
+
+COPY --from=build --chown=nextjs:nodejs \
+  /app/.next/static ./.next/static
+
+COPY --from=build --chown=nextjs:nodejs \
+  /app/public ./public
+
+USER nextjs
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+## Сборка и сравнение
+
+```bash
+docker build --tag handbook:production .
+docker image ls handbook
+docker history handbook:production
+```
+
+Можно остановиться на промежуточной стадии для диагностики:
+
+```bash
+docker build \
+  --target build \
+  --tag handbook:build \
+  .
+```
+
+## Частая ошибка
+
+Команда ниже отменяет пользу стадий:
+
+```dockerfile
+COPY --from=build /app /app
+```
+
+Она возвращает в runtime весь проект, включая исходники и dev-зависимости. Копируйте только необходимые артефакты.
+
+Multi-stage build не обязан быть первой оптимизацией новичка. Сначала добейтесь корректной обычной сборки, затем разделяйте стадии и сравнивайте результат.
+
+[Официальная документация multi-stage builds](https://docs.docker.com/build/building/multi-stage/)
+
+[Далее: систематическая диагностика →](/docker/operations/debugging)

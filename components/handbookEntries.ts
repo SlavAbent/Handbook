@@ -3,7 +3,7 @@ export type HandbookEntry = {
   slug: string
   href: string
   description: string
-  technology: 'React' | 'React DOM' | 'TypeScript'
+  technology: 'React' | 'React DOM' | 'TypeScript' | 'Docker'
   group: string
 }
 
@@ -88,4 +88,40 @@ export const utilityTypes: HandbookEntry[] = [
   utilityType('NoInfer', 'no-infer', 'Управление выводом типа')
 ]
 
-export const handbookEntries = [...reactHooks, ...reactDomHooks, ...utilityTypes]
+const dockerEntry = (
+  name: string,
+  slug: string,
+  description: string,
+  group: string,
+  groupSlug: string
+): HandbookEntry => ({
+  name,
+  slug,
+  description,
+  group,
+  technology: 'Docker',
+  href: `/docker/${groupSlug}/${slug}`
+})
+
+export const dockerEntries: HandbookEntry[] = [
+  dockerEntry('Зачем нужен Docker', 'why-docker', 'Проблемы, которые решают контейнеры', 'Основы', 'fundamentals'),
+  dockerEntry('Установка Docker', 'installation', 'Docker Desktop и Docker Engine', 'Основы', 'fundamentals'),
+  dockerEntry('Первый контейнер', 'first-container', 'Запуск hello-world и Nginx', 'Основы', 'fundamentals'),
+  dockerEntry('Образы и контейнеры', 'images-and-containers', 'Разница между образом и контейнером', 'Основы', 'fundamentals'),
+  dockerEntry('Docker CLI', 'cli', 'Основные команды управления Docker', 'Основы', 'fundamentals'),
+  dockerEntry('Первое Node.js-приложение', 'node-app', 'Минимальный сервер перед упаковкой', 'Основы', 'fundamentals'),
+  dockerEntry('Dockerfile', 'dockerfile', 'Сборка собственного образа', 'Сборка образов', 'build'),
+  dockerEntry('.dockerignore', 'dockerignore', 'Исключение файлов из контекста сборки', 'Сборка образов', 'build'),
+  dockerEntry('Volumes и bind mounts', 'volumes', 'Постоянные данные и локальные файлы', 'Хранение и сети', 'storage-and-networking'),
+  dockerEntry('Сети и порты', 'networks-and-ports', 'Связь контейнеров и публикация портов', 'Хранение и сети', 'storage-and-networking'),
+  dockerEntry('Docker Compose', 'docker-compose', 'Описание многоконтейнерного приложения', 'Docker Compose', 'compose'),
+  dockerEntry('Next.js и PostgreSQL', 'nextjs-and-postgres', 'Практический стек из двух сервисов', 'Docker Compose', 'compose'),
+  dockerEntry('Переменные окружения', 'environment-variables', 'Конфигурация сервисов и интерполяция', 'Docker Compose', 'compose'),
+  dockerEntry('Secrets', 'secrets', 'Безопасная передача чувствительных значений', 'Docker Compose', 'compose'),
+  dockerEntry('Healthcheck и зависимости', 'healthchecks', 'Проверка готовности и порядок запуска', 'Docker Compose', 'compose'),
+  dockerEntry('Multi-stage builds', 'multi-stage-builds', 'Компактные production-образы', 'Production', 'build'),
+  dockerEntry('Диагностика', 'debugging', 'Логи, exec, inspect и статистика', 'Эксплуатация', 'operations'),
+  dockerEntry('Безопасность и production', 'security', 'Минимальные привилегии и безопасные образы', 'Эксплуатация', 'operations')
+]
+
+export const handbookEntries = [...reactHooks, ...reactDomHooks, ...utilityTypes, ...dockerEntries]

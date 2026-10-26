@@ -1,0 +1,92 @@
+---
+title: Docker CLI
+description: Основные команды Docker CLI для образов, контейнеров и очистки окружения.
+---
+
+# Docker CLI
+
+Не нужно запоминать весь Docker CLI. В начале достаточно нескольких команд для ответа на четыре вопроса: что запущено, что произошло, как остановить и как удалить.
+
+CLI часто имеет форму `docker <object> <command>`. Например, `docker container stop`. Короткие варианты вроде `docker ps` означают то же самое и часто встречаются в документации.
+
+## Минимальный рабочий набор
+
+```bash
+# Что работает прямо сейчас?
+docker ps
+
+# Какие containers существуют, включая остановленные?
+docker ps --all
+
+# Что пишет приложение?
+docker logs first-web
+
+# Как остановить и удалить?
+docker stop first-web
+docker rm first-web
+```
+
+Используйте `docker logs --follow first-web`, чтобы наблюдать новые строки. Выход из просмотра через `Ctrl+C` не останавливает сам container.
+
+## Образы
+
+```bash
+docker image ls
+docker image pull node:24-alpine
+docker image inspect node:24-alpine
+docker image rm node:24-alpine
+```
+
+## Контейнеры
+
+```bash
+docker container ls
+docker container ls --all
+docker container stop api
+docker container start api
+docker container restart api
+docker container rm api
+```
+
+`docker run` создаёт новый контейнер. `docker start` повторно запускает уже созданный:
+
+```bash
+docker run --name api --detach --publish 3000:3000 handbook-api:1.0
+docker start api
+```
+
+## Заглядываем внутрь
+
+```bash
+docker exec --interactive --tty api sh
+docker exec api node --version
+```
+
+`docker exec` запускает дополнительную команду внутри уже работающего container. Это удобно для диагностики. В небольшом image может не быть `bash`; сначала пробуйте `sh`.
+
+## Копирование файлов
+
+```bash
+docker cp api:/app/logs/error.log ./error.log
+docker cp ./fixture.json api:/tmp/fixture.json
+```
+
+Для постоянной синхронизации файлов используйте mount, а не повторяющийся `docker cp`.
+
+## Освобождение места
+
+Сначала посмотрите потребление:
+
+```bash
+docker system df
+docker image prune
+docker container prune
+```
+
+`docker system prune` удаляет несколько категорий неиспользуемых объектов. Опция `--volumes` может удалить данные, поэтому перед очисткой проверяйте точную область и резервные копии.
+
+На учебном этапе не запускайте очистку автоматически. Сначала научитесь удалять конкретный container или image по имени.
+
+[Справочник Docker CLI](https://docs.docker.com/reference/cli/docker/)
+
+[Далее: готовим первое Node.js-приложение →](/docker/fundamentals/node-app)

@@ -1,0 +1,85 @@
+---
+title: Первое Node.js-приложение
+description: Подготовка простого HTTP-сервера перед созданием Docker image.
+---
+
+# Первое Node.js-приложение
+
+До Dockerfile создадим минимальное приложение и убедимся, что оно работает обычно. Это важно: Docker упаковывает приложение, но не исправляет неработающий код.
+
+## Шаг 1. Создаём проект
+
+```bash
+mkdir docker-hello
+cd docker-hello
+npm init --yes
+```
+
+Создайте `server.js`:
+
+```js
+import { createServer } from 'node:http'
+
+const port = Number(process.env.PORT ?? 3000)
+
+const server = createServer((request, response) => {
+  response.writeHead(200, {
+    'Content-Type': 'text/plain; charset=utf-8'
+  })
+
+  response.end('Привет из Node.js!\n')
+})
+
+server.listen(port, '0.0.0.0', () => {
+  console.log(`Сервер запущен на порту ${port}`)
+})
+```
+
+В `package.json` добавьте тип модулей и команду запуска:
+
+```json
+{
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
+```
+
+## Почему адрес `0.0.0.0`
+
+`localhost` внутри будущего container доступен только самому container. Адрес `0.0.0.0` говорит серверу принимать соединения на всех интерфейсах container, после чего Docker сможет направить запрос с опубликованного порта.
+
+## Шаг 2. Проверяем без Docker
+
+```bash
+npm start
+```
+
+В другом терминале:
+
+```bash
+curl http://localhost:3000
+```
+
+Ожидаемый ответ:
+
+```text
+Привет из Node.js!
+```
+
+Остановите сервер сочетанием `Ctrl+C`.
+
+## Что мы будем упаковывать
+
+Проект пока состоит из трёх важных частей:
+
+```text
+docker-hello/
+├── package.json
+└── server.js
+```
+
+В следующей главе Dockerfile установит Node.js, скопирует эти файлы и задаст `npm start` как основную команду container.
+
+[Далее: первый Dockerfile →](/docker/build/dockerfile)

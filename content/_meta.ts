@@ -2,6 +2,7 @@ const meta = {
   index: { title: 'О книге', theme: { toc: false } },
   react: { title: 'React' },
   typescript: { title: 'TypeScript' },
+  docker: { title: 'Docker' },
   'utility-types': {
     title: 'Utility Types',
     display: 'hidden',

@@ -1,0 +1,74 @@
+---
+title: Healthcheck и зависимости
+description: Проверки готовности контейнера и depends_on в Docker Compose.
+---
+
+# Healthcheck и зависимости
+
+Container может иметь состояние `running`, хотя приложение внутри ещё загружается. PostgreSQL, например, запускает процесс раньше, чем заканчивает инициализацию базы. Поэтому «процесс запущен» и «сервис готов» — разные состояния.
+
+`healthcheck` периодически выполняет небольшую проверку внутри container и присваивает состояние:
+
+- `starting` — проверка ещё не стала успешной;
+- `healthy` — сервис отвечает ожидаемым способом;
+- `unhealthy` — несколько проверок подряд завершились ошибкой.
+
+## PostgreSQL и приложение
+
+```yaml
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_DB: handbook
+      POSTGRES_PASSWORD: development
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d handbook"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  web:
+    build: .
+    depends_on:
+      database:
+        condition: service_healthy
+```
+
+Разберём настройки:
+
+- `test` — команда проверки;
+- `interval` — пауза между запусками;
+- `timeout` — сколько ждать одну проверку;
+- `retries` — сколько ошибок допускается;
+- `start_period` — время на начальную загрузку.
+
+Long syntax `depends_on` с `service_healthy` ждёт успешную проверку зависимости перед запуском зависимого сервиса.
+
+## HTTP healthcheck
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://127.0.0.1:3000/health \
+  || exit 1
+```
+
+Команда проверки должна существовать в образе. Не добавляйте большой пакет вроде `curl` только ради healthcheck, если runtime уже содержит подходящий инструмент или приложение может предоставить небольшую встроенную проверку.
+
+## Просмотр состояния
+
+```bash
+docker compose ps
+docker inspect database \
+  --format '{{json .State.Health}}'
+```
+
+## Healthcheck не заменяет устойчивость
+
+Зависимость может стать недоступной после запуска. Приложение всё равно должно иметь таймауты, retry с ограничением и понятное поведение при ошибке. Не превращайте health endpoint в тяжёлую полную диагностику всех внешних систем.
+
+[Документация startup order в Compose](https://docs.docker.com/compose/how-tos/startup-order/)
+
+[Далее: уменьшаем production image →](/docker/build/multi-stage-builds)

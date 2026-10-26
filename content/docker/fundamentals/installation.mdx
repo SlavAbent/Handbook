@@ -1,0 +1,70 @@
+---
+title: Установка Docker
+description: Выбор между Docker Desktop и Docker Engine, установка и проверка окружения.
+---
+
+# Установка Docker
+
+На этом шаге наша цель не изучить все настройки, а получить работающую команду `docker`. Docker состоит из клиента, которому вы вводите команды, и Engine, который действительно создаёт images и containers.
+
+Для локальной разработки на macOS и Windows обычно используют Docker Desktop: он устанавливает Docker Engine в управляемой Linux VM, CLI, Docker Compose и графический интерфейс. На Linux можно установить Docker Desktop либо Docker Engine напрямую из официального репозитория пакетов.
+
+## Что выбрать
+
+| Среда | Рекомендуемый вариант |
+| --- | --- |
+| macOS | Docker Desktop; альтернатива — совместимая Linux VM |
+| Windows | Docker Desktop с WSL 2 для Linux-контейнеров |
+| Linux workstation | Docker Engine или Docker Desktop |
+| Linux server | Docker Engine и Compose plugin без GUI |
+
+Следуйте инструкции для своей ОС на <a className="official-reference" href="https://docs.docker.com/engine/install/">официальной странице установки</a>. Не переносите команды репозитория пакетов между разными дистрибутивами Linux.
+
+После установки запустите Docker Desktop либо службу Docker Engine. Само наличие команды CLI ещё не означает, что Engine доступен.
+
+## Проверка установки
+
+```bash
+docker version
+docker info
+docker compose version
+```
+
+`docker version` показывает две части:
+
+```text
+Client: команда docker установлена
+Server: Docker Engine отвечает на запросы
+```
+
+Если Client есть, а Server отсутствует, daemon или VM не запущены либо выбран недоступный context.
+
+Запустите тестовый контейнер:
+
+```bash
+docker run --rm hello-world
+```
+
+Docker скачает образ, создаст контейнер, выведет сообщение и удалит остановленный контейнер благодаря `--rm`.
+
+Не страшно, если смысл всех частей команды пока неясен: в следующей главе мы разберём их по одной и запустим веб-сервер.
+
+## Context и доступ к daemon
+
+```bash
+docker context ls
+docker context show
+```
+
+Context определяет, к какому Engine подключается CLI. Не исправляйте ошибку доступа к сокету запуском всех команд через `sudo`, не разобравшись с причиной: это создаёт root-владельцев файлов и скрывает неверную настройку прав.
+
+## Частые проблемы
+
+- `Cannot connect to the Docker daemon` — Engine или VM не запущены либо выбран неверный context.
+- `permission denied` для `/var/run/docker.sock` — у пользователя нет доступа к сокету. Учитывайте, что членство в группе `docker` фактически даёт root-уровень контроля над хостом.
+- Контейнер сразу завершается — основной процесс завершил работу; это не обязательно ошибка Docker.
+- Образ другой архитектуры запускается медленно — используется эмуляция, например `amd64` на ARM.
+
+[Официальное руководство по установке](https://docs.docker.com/engine/install/)
+
+[Далее: первый контейнер →](/docker/fundamentals/first-container)

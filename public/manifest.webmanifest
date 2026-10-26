@@ -1,7 +1,7 @@
 {
   "name": "Карманная книга разработчика",
   "short_name": "Карманная книга",
-  "description": "Русскоязычный справочник по React, React DOM и TypeScript",
+  "description": "Русскоязычный справочник по React, React DOM, TypeScript и Docker",
   "lang": "ru",
   "start_url": "/",
   "scope": "/",

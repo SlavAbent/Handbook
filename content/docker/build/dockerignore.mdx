@@ -1,0 +1,83 @@
+---
+title: .dockerignore
+description: Управление build context с помощью .dockerignore.
+---
+
+# `.dockerignore`
+
+В команде `docker build .` точка означает «отправить текущую папку builder». Эта папка называется build context. Чем больше context, тем дольше передача и тем выше риск случайно добавить в image ненужный файл.
+
+`.dockerignore` работает похоже на `.gitignore`: перечисленные пути не попадают в build context.
+
+## Начинаем с малого
+
+Для нашего учебного Node.js-проекта достаточно:
+
+```dockerignore
+node_modules
+npm-debug.log
+.git
+.env
+```
+
+Почему это важно:
+
+- `node_modules` может быть большим и собранным для другой ОС;
+- `.git` не нужен приложению во время работы;
+- `.env` может содержать пароли;
+- логи не являются исходным кодом.
+
+## Расширяем для Next.js
+
+```dockerignore
+node_modules
+.next
+out
+coverage
+
+.git
+.DS_Store
+*.log
+
+.env
+.env.*
+!.env.example
+
+Dockerfile*
+compose*.yaml
+README.md
+```
+
+Не копируйте список механически. Например, исключение `public` сломает приложение, которому нужны статические файлы. Добавляйте правило только когда понимаете, почему файл не нужен во время сборки.
+
+## Проверка контекста
+
+```bash
+docker build \
+  --progress=plain \
+  --tag handbook:test \
+  .
+```
+
+В выводе BuildKit найдите строку передачи context. Необычно большой размер часто означает, что `node_modules`, build output или тестовые данные не исключены.
+
+## Отдельный ignore для Dockerfile
+
+Docker поддерживает файл вида `<Dockerfile>.dockerignore` рядом с конкретным Dockerfile:
+
+```text
+Dockerfile
+Dockerfile.dockerignore
+Dockerfile.test
+Dockerfile.test.dockerignore
+```
+
+Специфичный файл имеет приоритет и позволяет передавать разные контексты для production и тестовой сборки.
+
+## Важное ограничение
+
+`.dockerignore` уменьшает контекст, но не удаляет секрет, уже добавленный в предыдущий слой. Если чувствительный файл попал в `COPY`, простое удаление следующей инструкцией не гарантирует его отсутствия в истории образа. Используйте secrets и пересоберите образ без скомпрометированного слоя.
+
+[Документация `.dockerignore`](https://docs.docker.com/build/concepts/context/#dockerignore-files)
+
+[Далее: сохраняем данные через volumes →](/docker/storage-and-networking/volumes)

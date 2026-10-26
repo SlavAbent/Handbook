@@ -1,0 +1,90 @@
+---
+title: Диагностика Docker
+description: Логи, docker exec, inspect, stats и систематическая диагностика контейнеров.
+---
+
+# Диагностика Docker
+
+Когда container не работает, случайный набор команд только усложняет поиск. Идите по одному маршруту: состояние → логи → конфигурация → команда внутри → сеть → ресурсы.
+
+## Шаг 1. Container вообще существует?
+
+```bash
+docker compose ps --all
+```
+
+Если сервис отсутствует, проверьте `docker compose config`. Если он имеет состояние `Exited`, переходите к логам и коду выхода.
+
+## Состояние и код выхода
+
+```bash
+docker compose ps --all
+docker inspect web \
+  --format 'status={{.State.Status}} exit={{.State.ExitCode}} error={{.State.Error}}'
+```
+
+Код `0` означает нормальное завершение основного процесса. Для веб-сервера это всё равно проблема: сервер должен продолжать работать. Код `137` часто связан с `SIGKILL`, в том числе из-за нехватки памяти, но причину нужно подтверждать данными окружения.
+
+## Логи
+
+```bash
+docker compose logs --tail=100 web
+docker compose logs --follow --timestamps web database
+```
+
+Приложение должно писать runtime-логи в stdout/stderr. Файл внутри удаляемого контейнера неудобен для сбора и может исчезнуть.
+
+Ищите первую содержательную ошибку, а не только последнюю строку. Сообщение «connection refused» часто является следствием недоступной зависимости, а не проблемой Docker Engine.
+
+## Команда внутри контейнера
+
+```bash
+docker compose exec web sh
+docker compose exec web env
+docker compose exec web node --version
+docker compose exec database \
+  pg_isready -U app -d handbook
+```
+
+`exec` требует работающий контейнер. Для образа, который сразу завершается, запустите временный контейнер с другой командой:
+
+```bash
+docker run --rm --interactive --tty \
+  --entrypoint sh \
+  handbook:production
+```
+
+## Конфигурация и ресурсы
+
+```bash
+docker compose config
+docker inspect web
+docker stats --no-stream
+docker system df
+```
+
+Не публикуйте полный `inspect` или `env` в тикете без проверки: вывод может содержать credentials и внутренние адреса.
+
+## Сеть
+
+```bash
+docker compose exec web getent hosts database
+docker compose exec web sh -c 'nc -zv database 5432'
+docker network inspect handbook_default
+```
+
+Утилита `nc` может отсутствовать в минимальном образе. Проверяйте сеть инструментом приложения либо отдельным диагностическим контейнером в той же сети.
+
+## Короткая памятка
+
+```text
+не стартует      → ps --all → logs → inspect
+не видит базу    → config → имя сервиса → network
+не открыт сайт   → ps → ports → адрес 0.0.0.0
+внезапно убит    → inspect exit code → stats → лимиты
+старый код       → compose up --build
+```
+
+[Официальный раздел диагностики Docker](https://docs.docker.com/engine/daemon/troubleshoot/)
+
+[Далее: базовая безопасность production →](/docker/operations/security)

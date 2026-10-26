@@ -10,7 +10,7 @@ import './styles.css'
 
 export const metadata: Metadata = {
   title: { default: 'Карманная книга разработчика', template: '%s — Карманная книга разработчика' },
-  description: 'Практический русскоязычный справочник по React, React DOM и TypeScript.',
+  description: 'Практический русскоязычный справочник по React, React DOM, TypeScript и Docker.',
   applicationName: 'Карманная книга разработчика',
   manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, title: 'Карманная книга', statusBarStyle: 'default' },

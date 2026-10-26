@@ -1,0 +1,108 @@
+---
+title: Docker Compose
+description: Пошаговое описание и управление несколькими Docker-сервисами.
+---
+
+# Docker Compose
+
+До сих пор мы запускали длинные команды `docker run`. Когда появляются приложение, база, сети и volumes, повторять flags вручную неудобно. Compose хранит эту конфигурацию в `compose.yaml` и управляет всем проектом одной командой.
+
+## От команды к YAML
+
+Эта команда:
+
+```bash
+docker run \
+  --name docker-hello \
+  --publish 3000:3000 \
+  docker-hello:1.1
+```
+
+Превращается в `compose.yaml`:
+
+```yaml
+services:
+  web:
+    image: docker-hello:1.1
+    ports:
+      - "3000:3000"
+```
+
+Разбор:
+
+- `services` — список частей приложения;
+- `web` — выбранное нами имя сервиса;
+- `image` — какой image запускать;
+- `ports` — те же правила публикации портов.
+
+## Первый запуск Compose
+
+```bash
+docker compose up
+```
+
+Compose создаст network и container. Логи останутся в текущем терминале. Остановите проект через `Ctrl+C`.
+
+Фоновый режим:
+
+```bash
+docker compose up --detach
+docker compose ps
+docker compose logs --follow web
+docker compose down
+```
+
+`down` удаляет containers и сеть проекта. Именованные volumes по умолчанию сохраняются.
+
+## Собираем image автоматически
+
+Если рядом находится Dockerfile, замените `image` на `build`:
+
+```yaml
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+```
+
+Теперь Compose может собрать image:
+
+```bash
+docker compose up --build
+```
+
+Без `--build` существующий image может не учитывать последние изменения кода.
+
+## Добавляем второй сервис
+
+```yaml
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - database
+
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_PASSWORD: development
+```
+
+Compose помещает оба сервиса в общую сеть. Из `web` база доступна по адресу `database:5432`.
+
+## Проверяем итоговую конфигурацию
+
+```bash
+docker compose config
+```
+
+Команда особенно полезна после добавления переменных и нескольких Compose-файлов: она показывает, что Docker действительно применит.
+
+В следующей главе расширим этот набросок до полноценного Next.js + PostgreSQL стека с постоянным volume.
+
+[Официальный Compose Quickstart](https://docs.docker.com/compose/gettingstarted/)
+
+[Далее: Next.js и PostgreSQL →](/docker/compose/nextjs-and-postgres)

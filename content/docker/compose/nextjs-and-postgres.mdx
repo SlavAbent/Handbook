@@ -1,0 +1,101 @@
+---
+title: Next.js и PostgreSQL
+description: Пошаговое объединение веб-приложения и базы данных через Docker Compose.
+---
+
+# Next.js и PostgreSQL
+
+Теперь применим изученное к реальному стеку. У нас будет два независимых сервиса:
+
+Предполагается, что у Next.js-проекта уже есть Dockerfile, приложение слушает `0.0.0.0:3000`, а серверный код читает строку подключения из `DATABASE_URL`. Конкретная библиотека базы может быть Prisma, Drizzle или `pg` — сетевой принцип для них одинаков.
+
+```text
+браузер
+   ↓ localhost:3000
+Next.js container
+   ↓ database:5432
+PostgreSQL container
+   ↓
+named volume
+```
+
+## Почему два container
+
+Один container обычно выполняет одну основную роль. Next.js и PostgreSQL обновляются, перезапускаются и масштабируются по-разному. Раздельные containers проще заменять и диагностировать.
+
+## Шаг 1. Добавляем базу
+
+```yaml
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: handbook
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: development
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
+```
+
+Запустите только базу:
+
+```bash
+docker compose up --detach database
+docker compose ps
+docker compose logs database
+```
+
+## Шаг 2. Добавляем Next.js
+
+```yaml
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://app:development@database:5432/handbook
+    depends_on:
+      - database
+
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: handbook
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: development
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
+```
+
+## Почему адрес базы — `database`
+
+Compose создаёт общую сеть и встроенный DNS. Имя сервиса `database` становится hostname. Если указать `localhost`, приложение будет искать PostgreSQL внутри собственного container `web`.
+
+## Шаг 3. Запускаем стек
+
+```bash
+docker compose up --build
+```
+
+Сначала оставьте режим без `--detach`: так одновременно видны логи обоих сервисов. После успешного запуска нажмите `Ctrl+C`, затем используйте фон:
+
+```bash
+docker compose up --detach
+docker compose ps
+docker compose logs --follow web
+```
+
+## Важное ограничение `depends_on`
+
+Короткая запись задаёт порядок запуска, но не гарантирует, что PostgreSQL уже принимает подключения. Приложение должно уметь повторить соединение, а позже мы добавим healthcheck.
+
+Пароль `development` подходит только для учебного локального примера. В следующих главах вынесем конфигурацию и secret из YAML.
+
+[Далее: переменные окружения →](/docker/compose/environment-variables)

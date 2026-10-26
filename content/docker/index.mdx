@@ -1,0 +1,80 @@
+---
+title: Docker
+description: Пошаговый курс Docker на русском — от первого контейнера до Next.js и PostgreSQL.
+asIndexPage: true
+---
+
+# Docker с нуля
+
+Этот раздел рассчитан на человека, который раньше почти не работал с Docker. Главы идут последовательно: сначала мы запустим готовый контейнер, затем соберём собственное Node.js-приложение и только после этого перейдём к Docker Compose, PostgreSQL и production-настройкам.
+
+## Главная идея
+
+Представьте обычный рецепт:
+
+- `Dockerfile` — рецепт приготовления приложения;
+- image — готовый неизменяемый набор по этому рецепту;
+- container — запущенный экземпляр image;
+- registry — хранилище готовых images;
+- volume — отдельное место для данных, которые нельзя терять вместе с container.
+
+```text
+исходный код + Dockerfile
+          ↓ docker build
+        image
+          ↓ docker run
+       container
+```
+
+В первых главах достаточно понимать эту цепочку. Networks, Compose, secrets и multi-stage builds появятся позже, когда станет понятно, какую проблему решает каждый инструмент.
+
+## Рекомендуемый маршрут
+
+### Шаг 1. Запускаем готовое
+
+<div className="utility-grid">
+  <a href="/docker/fundamentals/why-docker"><code>1. Зачем Docker</code><span>Какую проблему решают контейнеры</span></a>
+  <a href="/docker/fundamentals/installation"><code>2. Установка</code><span>Проверяем Docker на компьютере</span></a>
+  <a href="/docker/fundamentals/first-container"><code>3. Первый контейнер</code><span>Запускаем hello-world и Nginx</span></a>
+  <a href="/docker/fundamentals/images-and-containers"><code>4. Image и container</code><span>Разбираемся в двух главных понятиях</span></a>
+  <a href="/docker/fundamentals/cli"><code>5. Основные команды</code><span>Управляем жизненным циклом контейнера</span></a>
+</div>
+
+### Шаг 2. Собираем своё приложение
+
+<div className="utility-grid">
+  <a href="/docker/fundamentals/node-app"><code>6. Node.js-сервер</code><span>Готовим простое приложение без Docker</span></a>
+  <a href="/docker/build/dockerfile"><code>7. Первый Dockerfile</code><span>Превращаем приложение в image</span></a>
+  <a href="/docker/build/dockerignore"><code>8. Контекст сборки</code><span>Не отправляем лишние файлы</span></a>
+</div>
+
+### Шаг 3. Данные и связь контейнеров
+
+<div className="utility-grid">
+  <a href="/docker/storage-and-networking/volumes"><code>9. Volumes</code><span>Сохраняем данные после удаления container</span></a>
+  <a href="/docker/storage-and-networking/networks-and-ports"><code>10. Сети и порты</code><span>Соединяем контейнеры между собой и с браузером</span></a>
+</div>
+
+### Шаг 4. Собираем приложение из сервисов
+
+<div className="utility-grid">
+  <a href="/docker/compose/docker-compose"><code>11. Docker Compose</code><span>Управляем несколькими контейнерами одной командой</span></a>
+  <a href="/docker/compose/nextjs-and-postgres"><code>12. Next.js + PostgreSQL</code><span>Собираем практический стек</span></a>
+  <a href="/docker/compose/environment-variables"><code>13. Конфигурация</code><span>Выносим изменяемые значения из кода</span></a>
+</div>
+
+### Шаг 5. Делаем надёжнее
+
+<div className="utility-grid">
+  <a href="/docker/compose/secrets"><code>14. Secrets</code><span>Не кладём пароли в image и Git</span></a>
+  <a href="/docker/compose/healthchecks"><code>15. Healthcheck</code><span>Отличаем «запущен» от «готов работать»</span></a>
+  <a href="/docker/build/multi-stage-builds"><code>16. Multi-stage build</code><span>Уменьшаем production image</span></a>
+  <a href="/docker/operations/debugging"><code>17. Диагностика</code><span>Ищем причину проблемы по шагам</span></a>
+  <a href="/docker/operations/security"><code>18. Безопасность</code><span>Ограничиваем возможности контейнера</span></a>
+</div>
+
+## Как работать с примерами
+
+Не копируйте сразу весь итоговый Compose-файл. Выполняйте главы по порядку и после каждой команды проверяйте результат. Если команда непонятна, остановитесь на её разборе: в следующих главах предполагается понимание предыдущего шага.
+
+Материалы сверены с <a className="official-reference" href="https://docs.docker.com/get-started/">официальным руководством Docker</a>. В книге используется современная команда `docker compose`, а не старая отдельная программа `docker-compose`.

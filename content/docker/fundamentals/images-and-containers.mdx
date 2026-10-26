@@ -1,0 +1,93 @@
+---
+title: Образы и контейнеры
+description: Как связаны Docker image, container, registry и слои файловой системы.
+---
+
+# Образы и контейнеры
+
+Image и container легко перепутать, потому что они связаны. Удобная аналогия: image похож на форму для печенья, а container — на конкретное печенье. Из одного image можно создать много независимых containers.
+
+Image — неизменяемый шаблон с файлами приложения и настройкой запуска. Container — запущенный экземпляр image со своим процессом, сетью и временным записываемым слоем.
+
+## Жизненный цикл
+
+```text
+Dockerfile → docker build → image → docker run → container
+                         ↕
+                      registry
+```
+
+## Наблюдаем связь на практике
+
+Скачайте image отдельно:
+
+```bash
+docker pull nginx:alpine
+docker image ls nginx
+```
+
+Теперь создайте два containers из одного image:
+
+```bash
+docker run --name web-one --detach --publish 8081:80 nginx:alpine
+docker run --name web-two --detach --publish 8082:80 nginx:alpine
+```
+
+Оба используют один локальный image, но имеют разные имена, процессы и опубликованные порты.
+
+```bash
+docker ps
+docker rm --force web-one web-two
+docker image ls nginx
+```
+
+После удаления containers image остаётся. Его можно использовать снова без повторного скачивания.
+
+Изменения в записываемом слое container исчезнут после его удаления. Данные, которые должны переживать container, позже поместим в volume.
+
+## Более полный запуск
+
+```bash
+docker pull nginx:1.27-alpine
+
+docker run --name web \
+  --detach \
+  --publish 8080:80 \
+  nginx:1.27-alpine
+```
+
+Команда создаёт container `web`, запускает его в фоне и направляет запросы с `localhost:8080` на порт `80` container.
+
+```bash
+docker ps
+docker stop web
+docker start web
+docker rm --force web
+```
+
+`docker stop` сохраняет container в остановленном состоянии. `docker rm` удаляет его, но не image.
+
+## Tags и digest
+
+Tag — изменяемое имя версии, например `postgres:17-alpine`. Digest идентифицирует конкретное содержимое:
+
+```bash
+docker image inspect postgres:17-alpine \
+  --format '{{json .RepoDigests}}'
+```
+
+Для воспроизводимости production-развёртывания фиксируйте конкретную версию, а для строгой гарантии — digest. `latest` не означает «самая новая безопасная версия» и может измениться.
+
+## Registry
+
+```bash
+docker login registry.example.com
+docker tag handbook:1.0 registry.example.com/team/handbook:1.0
+docker push registry.example.com/team/handbook:1.0
+```
+
+Не передавайте пароли в аргументах команды и не публикуйте образ, пока не проверили его содержимое и историю слоёв.
+
+[Официальный обзор объектов Docker](https://docs.docker.com/get-started/docker-overview/)
+
+[Далее: основные команды Docker →](/docker/fundamentals/cli)

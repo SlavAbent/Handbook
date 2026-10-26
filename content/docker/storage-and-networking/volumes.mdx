@@ -1,0 +1,103 @@
+---
+title: Volumes и bind mounts
+description: Постоянные данные Docker, управляемые volumes и bind mounts.
+---
+
+# Volumes и bind mounts
+
+Container удобно заменять, поэтому важные данные нельзя хранить только внутри него. Удаление container похоже на удаление временной рабочей копии. Volume хранится отдельно и может быть подключён к следующему container.
+
+## Наблюдаем проблему
+
+Создадим файл внутри container:
+
+```bash
+docker run --name temporary --detach alpine \
+  sh -c 'echo "важные данные" > /data.txt && sleep 300'
+
+docker exec temporary cat /data.txt
+docker rm --force temporary
+```
+
+После удаления `temporary` получить `/data.txt` уже нельзя. Теперь повторим с volume.
+
+## Первый volume
+
+```bash
+docker volume create lesson-data
+
+docker run --rm \
+  --mount type=volume,source=lesson-data,target=/data \
+  alpine \
+  sh -c 'echo "данные в volume" > /data/message.txt'
+```
+
+Первый container уже удалён из-за `--rm`, но файл остался в `lesson-data`. Прочитаем его другим container:
+
+```bash
+docker run --rm \
+  --mount type=volume,source=lesson-data,target=/data \
+  alpine \
+  cat /data/message.txt
+```
+
+Ожидаемый вывод: `данные в volume`.
+
+## Какой mount выбрать
+
+| Тип | Источник | Подходит для |
+| --- | --- | --- |
+| Volume | Управляется Docker | Базы данных и постоянные данные |
+| Bind mount | Конкретный путь хоста | Исходный код и локальная разработка |
+| tmpfs | Память хоста | Временные чувствительные данные на Linux |
+
+## Именованный volume PostgreSQL
+
+```bash
+docker volume create postgres-data
+
+docker run --name database \
+  --detach \
+  --env POSTGRES_PASSWORD=development-only \
+  --mount type=volume,source=postgres-data,target=/var/lib/postgresql/data \
+  postgres:17-alpine
+```
+
+Здесь PostgreSQL пишет базу в `/var/lib/postgresql/data`, а Docker связывает этот путь с `postgres-data`. Проверьте volume:
+
+```bash
+docker volume inspect postgres-data
+docker rm --force database
+docker volume ls
+```
+
+Удаление контейнера не удаляет именованный volume. Удаляйте его отдельно только после проверки данных и резервной копии.
+
+## Чем bind mount отличается
+
+Volume находится под управлением Docker. Bind mount указывает на конкретную папку компьютера. Для базы обычно выбирают volume, а для редактируемого исходного кода в development — bind mount.
+
+## Bind mount исходного кода
+
+```bash
+docker run --rm \
+  --publish 3000:3000 \
+  --mount type=bind,source="$PWD",target=/app \
+  --workdir /app \
+  node:24-alpine \
+  sh -c "corepack enable && pnpm dev"
+```
+
+Изменение файла на компьютере сразу видно внутри container. Но bind mount напрямую открывает путь хоста container. Добавьте `readonly`, если запись не нужна:
+
+```bash
+--mount type=bind,source="$PWD/config",target=/app/config,readonly
+```
+
+## Резервное копирование
+
+Способ backup зависит от приложения. Для PostgreSQL надёжнее `pg_dump`, чем копирование файлов работающей базы. Volume не является резервной копией: повреждение данных или ошибочная команда сохранятся вместе с ним.
+
+[Официальная документация storage](https://docs.docker.com/engine/storage/)
+
+[Далее: сети и порты →](/docker/storage-and-networking/networks-and-ports)
